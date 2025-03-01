@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Профиль</title>
+</head>
+<body>
+    <h1>Профиль пользователя</h1>
+    {% if user.is_authenticated %}
+        <p>Имя пользователя: {{ user.username }}</p>
+        <a href="{% url 'logout' %}">Выйти</a>
+    {% else %}
+        <p>Доступ запрещен. <a href="{% url 'login' %}">Войдите</a></p>
+    {% endif %}
+</body>
+</html>
