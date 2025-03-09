@@ -1,13 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Главная</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATAN</title>
+    <style>
+        /* Общие стили */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+        }
+
+        /* Шапка */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: white;
+            background: black;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-right: 15px;
+        }
+
+        .login-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .login-btn:hover {
+            background: #27ae60;
+        }
+
+        /* Контент */
+        main {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+
+        .block {
+            flex: 1;
+            min-width: 250px;
+            margin: 10px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .formulas { background: #3498db; color: white; }
+        .favorites { background: #e74c3c; color: white; }
+        .theory { background: #f1c40f; color: black; }
+        .notebook {
+            background: #9b59b6;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            padding: 0;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: block;
+            padding: 5px 0;
+            text-align: center;
+        }
+
+        ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* Кнопка блокнота на весь блок */
+        .notebook a {
+            text-decoration: none;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .notebook a:hover {
+            background: #8e44ad;
+        }
+
+        /* Подвал */
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Тут ничего нету</h1>
-    <nav>
-        <a href="/signup/">Регистрация</a> |
-        <a href="/login/">Вход</a>
-    </nav>
+    <header>
+        <div class="logo">MATAN</div>
+        <nav>
+            <a href="#" class="active">ГЛАВНАЯ</a>
+            <button class="login-btn">ВОЙТИ</button>
+        </nav>
+    </header>
+
+    <main>
+        <section class="block formulas">
+            <h2>ФОРМУЛЫ</h2>
+            <ul>
+                <li><a href="#">Физика</a></li>
+                <li><a href="#">Алгебра</a></li>
+                <li><a href="#">Геометрия</a></li>
+            </ul>
+        </section>
+
+        <section class="block favorites">
+            <h2>ИЗБРАННОЕ</h2>
+            <ul>
+                <li><a href="#">Физика</a></li>
+                <li><a href="#">Алгебра</a></li>
+                <li><a href="#">Геометрия</a></li>
+            </ul>
+        </section>
+<section class="block theory">
+            <h2>ТЕОРИЯ</h2>
+            <ul>
+                <li><a href="#">Физика</a></li>
+                <li><a href="#">Алгебра</a></li>
+                <li><a href="#">Геометрия</a></li>
+            </ul>
+        </section>
+
+        <section class="block notebook">
+            <a href="#">Перейти в блокнот</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>Контакты</p>
+    </footer>
 </body>
 </html>
