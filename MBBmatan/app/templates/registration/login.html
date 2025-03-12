@@ -1,5 +1,176 @@
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-</form>
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в MATAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .login-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #27ae60;
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .links {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .links a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">MATAN</div>
+        <nav></nav>
+    </header>
+
+    <div class="login-container">
+        <div class="login-box">
+            <form method="post" class="login-form">
+                {% csrf_token %}
+
+                <h2>Добро пожаловать в MATAN</h2>
+
+                {% if form.errors %}
+                    <div class="error-message">
+                        Неверный логин или пароль!
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <input type="text"
+                           name="username"
+                           id="id_username"
+                           required
+                           autofocus
+                           placeholder="Логин">
+                </div>
+
+                <div class="form-group">
+                    <input type="password"
+                           name="password"
+                           id="id_password"
+                           required
+                           placeholder="Пароль">
+                </div>
+
+                <button type="submit" class="btn-login">Войти</button>
+
+                <div class="links">
+                    <a href="{% url 'signup' %}">Нет аккаунта? Создайте</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>Контакты</p>
+    </footer>
+</body>
+</html>
