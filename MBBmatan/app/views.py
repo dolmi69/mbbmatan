@@ -5,12 +5,18 @@ from django.views.generic import CreateView, TemplateView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import RegisterForm, LoginForm
+from django.urls import reverse_lazy
+from .forms import CustomUserCreationForm
 
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'registration/signup.html'
-    success_url = '/login/'
+    success_url = '/accounts/login/'
 
+class SignUpView(CreateView):
+    form_class = CustomUserCreationForm  # Используем нашу кастомную форму
+    template_name = 'registration/signup.html'
+    success_url = reverse_lazy('login')
 
 def home(request):
     context = {

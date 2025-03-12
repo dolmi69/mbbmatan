@@ -1,15 +1,216 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Профиль</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль MATAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .profile-info {
+            position: absolute;
+            top: 100px;
+            left: 40px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 300px;
+        }
+
+        .favorites-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 60%;
+            margin: 100px auto;
+            text-align: left;
+        }
+
+        .profile-title {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .username {
+            color: #3498db;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .btn-logout {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            display: inline-block;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
+        }
+
+        .favorites-title {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2ecc71;
+            padding-bottom: 10px;
+        }
+
+        .favorites-list {
+            list-style-type: decimal;
+            padding-left: 25px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .formula-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .formula-text {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #2c3e50;
+            flex-grow: 1;
+        }
+
+        .heart-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.3s;
+        }
+
+        .heart-icon {
+            font-size: 24px;
+            color: #e74c3c;
+            transition: all 0.3s;
+        }
+
+        .heart-btn:hover .heart-icon {
+            color: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .access-warning {
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .login-link {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <h1>Профиль пользователя</h1>
+    <header>
+        <div class="logo">MATAN</div>
+        <nav></nav>
+    </header>
+
     {% if user.is_authenticated %}
-        <p>Имя пользователя: {{ user.username }}</p>
-        <a href="{% url 'logout' %}">Выйти</a>
+        <div class="profile-info">
+            <div class="profile-title">Ваш профиль</div>
+            <div class="username">{{ user.username }}</div>
+            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+        </div>
+
+        <div class="favorites-box">
+            <div class="favorites-title">Ваши избранные формулы:</div>
+            <ol class="favorites-list">
+                <li>
+                    <div class="formula-item">
+                        <div class="formula-text">E = mc<sup>2</sup></div>
+                        <button class="heart-btn" onclick="toggleLike(this)">
+                            <div class="heart-icon">♥</div>
+                        </button>
+                    </div>
+                </li>
+                <li>
+                    <div class="formula-item">
+                        <div class="formula-text">E = mc<sup>2</sup></div>
+                        <button class="heart-btn" onclick="toggleLike(this)">
+                            <div class="heart-icon">♥</div>
+                        </button>
+                    </div>
+                </li>
+                <li>
+                    <div class="formula-item">
+                        <div class="formula-text">E = mc<sup>2</sup></div>
+                        <button class="heart-btn" onclick="toggleLike(this)">
+                            <div class="heart-icon">♥</div>
+                        </button>
+                    </div>
+                </li>
+            </ol>
+            <a href="{% url 'home' %}" class="login-link">временная ссылка на главное меню</a>
+        </div>
     {% else %}
-        <p>Доступ запрещен. <a href="{% url 'login' %}">Войдите</a></p>
+        <div class="access-warning">
+            <p>Доступ запрещен</p>
+            <a href="{% url 'login' %}" class="login-link">Перейти к авторизации</a>
+        </div>
     {% endif %}
+
+    <footer>
+        <p>Контакты</p>
+    </footer>
+
+    <script>
+        function toggleLike(button) {
+            const heart = button.querySelector('.heart-icon');
+            heart.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>
