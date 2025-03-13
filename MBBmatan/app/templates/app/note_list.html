@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Мои заметки</h1>
+<a href="{% url 'app:note_create' %}">Создать новую</a>
+<ul>
+    {% for note in notes %}
+    <li>
+        {{ note.title }} 
+        <a href="{% url 'app:note_update' note.pk %}">✏️</a>
+        <a href="{% url 'app:note_delete' note.pk %}">🗑️</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

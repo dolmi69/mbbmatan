@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Мой проект{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <a href="/">Главная</a>
+        <a href="{% url 'app:note_list' %}">Блокнот</a>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

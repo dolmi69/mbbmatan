@@ -2,6 +2,9 @@ from django.urls import path
 from .views import RegisterView, CustomLoginView, ProfileView, home
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views
+from . import views
+
+app_name = "app"
 
 urlpatterns = [
     path('signup/', RegisterView.as_view(), name='signup'),
@@ -10,4 +13,8 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('', ProfileView.as_view(), name='profile'),
     path('home/', home, name='home'),
+    path("notes/", views.NoteListView.as_view(), name="note_list"),
+    path("notes/create/", views.NoteCreateView.as_view(), name="note_create"),
+    path("notes/update/<int:pk>/", views.NoteUpdateView.as_view(), name="note_update"),
+    path("notes/delete/<int:pk>/", views.NoteDeleteView.as_view(), name="note_delete"),
 ]

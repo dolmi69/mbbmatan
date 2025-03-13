@@ -7,6 +7,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import RegisterForm, LoginForm
 from django.urls import reverse_lazy
 from .forms import CustomUserCreationForm
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from .models import Note
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class RegisterView(CreateView):
     form_class = RegisterForm
@@ -31,3 +35,31 @@ class CustomLoginView(LoginView):
 
 class ProfileView(LoginRequiredMixin, TemplateView):
     template_name = 'profile.html'
+
+class NoteListView(LoginRequiredMixin, ListView):
+    model = Note
+    template_name = "app/note_list.html"
+    context_object_name = "notes"
+
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)
+
+class NoteCreateView(LoginRequiredMixin, CreateView):
+    model = Note
+    fields = ["title", "content"]
+    template_name = "app/note_form.html"
+    success_url = reverse_lazy("app:note_list")
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+class NoteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Note
+    fields = ["title", "content"]
+    template_name = "app/note_form.html"
+    success_url = reverse_lazy("app:note_list")
+
+class NoteDeleteView(LoginRequiredMixin, DeleteView):
+    model = Note
+    success_url = reverse_lazy("app:note_list")
