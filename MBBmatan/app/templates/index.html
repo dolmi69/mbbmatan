@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MATAN</title>
     <style>
-        /* Общие стили */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -13,7 +13,6 @@
             background: #f8f5e6;
         }
 
-        /* Шапка */
         header {
             display: flex;
             justify-content: space-between;
@@ -21,6 +20,13 @@
             background: #777;
             padding: 15px 20px;
             color: white;
+            position: relative;
+        }
+
+        .nav-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
         }
 
         .logo {
@@ -31,16 +37,19 @@
         nav {
             display: flex;
             align-items: center;
+            gap: 15px;
         }
 
-        nav a {
+        nav a.nav-btn {
             text-decoration: none;
             color: white;
             background: black;
             padding: 10px 15px;
             border-radius: 5px;
-            margin-right: 15px;
+            transition: all 0.3s ease;
         }
+
+
 
         .login-btn {
             background: #2ecc71;
@@ -58,19 +67,18 @@
             padding: 10px 15px;
             color: inherit;
             text-decoration: none;
-            background: none !important;
         }
 
         .login-btn:hover {
             background: #27ae60;
         }
 
-        /* Контент */
         main {
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
             padding: 20px;
+             margin-top: 80px;
         }
 
         .block {
@@ -84,41 +92,73 @@
 
         .formulas { background: #3498db; color: white; }
         .favorites { background: #e74c3c; color: white; }
-        .theory { background: #f1c40f; color: black; }
+        .theory { background: #f1c40f; color: white; }
         .notebook {
             background: #9b59b6;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 200px;
+            height: 500px;
             padding: 0;
         }
 
         h2 {
             margin-bottom: 10px;
             text-align: center;
+            position: relative;
         }
+
+        h2::after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+        margin: 15px auto 20px;
+        }
+
 
         ul {
             list-style: none;
             padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        ul li {
+            width: 100%;
+            text-align: center;
         }
 
         ul li a {
             text-decoration: none;
-            color: white;
+            color: inherit;
             font-weight: bold;
-            display: block;
-            padding: 5px 0;
-            text-align: center;
+            display: inline-block;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 200px;
+        }
+
+        ul li:first-child {
+        margin-top: 60px;
         }
 
         ul li a:hover {
-            text-decoration: underline;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Кнопка блокнота на весь блок */
+        .theory ul li a:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
         .notebook a {
             text-decoration: none;
             color: white;
@@ -131,19 +171,50 @@
             height: 100%;
             border-radius: 10px;
             transition: background 0.3s;
+            padding: 20px;
+            text-align: center;
         }
 
         .notebook a:hover {
             background: #8e44ad;
         }
 
-        /* Подвал */
         footer {
             background: #777;
             text-align: center;
             padding: 10px;
             color: white;
-            margin-top: 20px;
+            margin-top: 162px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .username {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: text-decoration 0.3s;
+        }
+
+        .username:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
         }
     </style>
 </head>
@@ -151,10 +222,16 @@
     <header>
         <div class="logo">MATAN</div>
         <nav>
-            <a href="#" class="active">ГЛАВНАЯ</a>
+            <a href="/home/" class="nav-btn active nav-center">ГЛАВНАЯ</a>
+            {% if user.is_authenticated %}
+            <div class="user-info">
+                <a href="/profile" class="username">{{ user.username }}</a>
+            </div>
+            {% else %}
             <button class="login-btn">
-                <a href="/accounts/login">ВОЙТИ</a>
+                <a href="{% url 'login' %}">ВОЙТИ</a>
             </button>
+            {% endif %}
         </nav>
     </header>
 
@@ -176,6 +253,7 @@
                 <li><a href="#">Геометрия</a></li>
             </ul>
         </section>
+
         <section class="block theory">
             <h2>ТЕОРИЯ</h2>
             <ul>
@@ -191,7 +269,7 @@
     </main>
 
     <footer>
-        <p>Контакты</p>
+        <p>Контакты: contact@matan.ru | Телефон: +7 (999) 123-45-67</p>
     </footer>
 </body>
 </html>

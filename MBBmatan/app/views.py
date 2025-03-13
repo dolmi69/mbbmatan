@@ -14,7 +14,7 @@ class RegisterView(CreateView):
     success_url = '/accounts/login/'
 
 class SignUpView(CreateView):
-    form_class = CustomUserCreationForm  # Используем нашу кастомную форму
+    form_class = CustomUserCreationForm
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('login')
 
