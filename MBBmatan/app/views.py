@@ -31,6 +31,15 @@ def home(request):
 def f_f(request):
     return render(request, 'formuls/f-f.html')
 
+def t_a(request):
+    return render(request, 'formuls/algebra.html')
+
+def t_g(request):
+    return render(request, 'formuls/geometry.html')
+
+def t_f(request):
+    return render(request, 'formuls/physics.html')
+
 
 class CustomLoginView(LoginView):
     form_class = LoginForm
