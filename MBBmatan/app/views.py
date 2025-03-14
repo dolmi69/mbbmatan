@@ -28,6 +28,10 @@ def home(request):
     }
     return render(request, 'index.html', context)
 
+def f_f(request):
+    return render(request, 'formuls/f-f.html')
+
+
 class CustomLoginView(LoginView):
     form_class = LoginForm
     template_name = 'registration/login.html'

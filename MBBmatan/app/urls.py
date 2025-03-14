@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, CustomLoginView, ProfileView, home
+from .views import RegisterView, CustomLoginView, ProfileView, home, f_f
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
@@ -17,4 +17,5 @@ urlpatterns = [
     path("notes/create/", views.NoteCreateView.as_view(), name="note_create"),
     path("notes/update/<int:pk>/", views.NoteUpdateView.as_view(), name="note_update"),
     path("notes/delete/<int:pk>/", views.NoteDeleteView.as_view(), name="note_delete"),
+    path('f_f/', f_f, name='f_f'),
 ]
