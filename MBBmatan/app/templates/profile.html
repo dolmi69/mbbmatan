@@ -215,14 +215,14 @@
             <div class="username">{{ user.username }}</div>
             {% if user.is_authenticated %}
             <div class="user-info">
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                <form action="{% url 'app:logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="logout-btn">Выйти</button>
                 </form>
             </div>
                 {% else %}
             <button class="login-btn">
-                <a href="{% url 'login' %}">ВОЙТИ</a>
+                <a href="{% url 'app:login' %}">ВОЙТИ</a>
             </button>
             {% endif %}
         </div>
@@ -255,12 +255,12 @@
                     </div>
                 </li>
             </ol>
-            <a href="{% url 'home' %}" class="login-link">временная ссылка на главное меню</a>
+            <a href="{% url 'app:home' %}" class="login-link">временная ссылка на главное меню</a>
         </div>
     {% else %}
         <div class="access-warning">
             <p>Доступ запрещен</p>
-            <a href="{% url 'login' %}" class="login-link">Перейти к авторизации</a>
+            <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
         </div>
     {% endif %}
 

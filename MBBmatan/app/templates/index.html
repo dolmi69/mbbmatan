@@ -184,7 +184,7 @@
             text-align: center;
             padding: 10px;
             color: white;
-            margin-top: 162px;
+            margin-top: 177px;
         }
 
         .user-info {
@@ -229,7 +229,7 @@
             </div>
             {% else %}
             <button class="login-btn">
-                <a href="{% url 'login' %}">ВОЙТИ</a>
+                <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
             </button>
             {% endif %}
         </nav>
@@ -269,7 +269,7 @@
     </main>
 
     <footer>
-        <p>Контакты: contact@matan.ru | Телефон: +7 (999) 123-45-67</p>
+        <p>Контакты: </p>
     </footer>
 </body>
 </html>
