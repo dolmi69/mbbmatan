@@ -10,6 +10,8 @@ from .forms import CustomUserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Note
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import FavoriteFormula
+from django.http import JsonResponse
 
 
 class RegisterView(CreateView):
@@ -76,3 +78,43 @@ class NoteUpdateView(LoginRequiredMixin, UpdateView):
 class NoteDeleteView(LoginRequiredMixin, DeleteView):
     model = Note
     success_url = reverse_lazy("app:note_list")
+
+
+
+
+def toggle_favorite(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        formula_text = request.POST.get('formula_text')
+        favorite, created = FavoriteFormula.objects.get_or_create(
+            user=request.user,
+            formula_text=formula_text
+        )
+        if not created:
+            favorite.delete()
+            return JsonResponse({'status': 'removed'})
+        return JsonResponse({'status': 'added'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+def profile_view(request):
+    if request.user.is_authenticated:
+        favorites = FavoriteFormula.objects.filter(user=request.user)
+        return render(request, 'profile.html', {'favorites': favorites})
+    return redirect('login')
+
+
+def physics_formulas(request):
+    formulas = [
+        {'text': 'E = mc<sup>2</sup>'},
+        {'text': 'F = ma'},
+        {'text': 'V = IR'}
+    ]
+
+    if request.user.is_authenticated:
+        user_favorites = FavoriteFormula.objects.filter(
+            user=request.user
+        ).values_list('formula_text', flat=True)
+
+        for formula in formulas:
+            formula['is_favorite'] = formula['text'] in user_favorites
+
+    return render(request, 'f-f.html', {'formulas': formulas})

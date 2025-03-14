@@ -200,6 +200,10 @@
             background: none !important;
         }
 
+        .heart-icon.active {
+            color: #ff4081 !important;
+        }
+
     </style>
 </head>
 <body>
@@ -213,49 +217,28 @@
         <div class="profile-info">
             <div class="profile-title">Ваш профиль</div>
             <div class="username">{{ user.username }}</div>
-            {% if user.is_authenticated %}
-            <div class="user-info">
-                <form action="{% url 'app:logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn">Выйти</button>
-                </form>
-            </div>
-                {% else %}
-            <button class="login-btn">
-                <a href="{% url 'app:login' %}">ВОЙТИ</a>
-            </button>
-            {% endif %}
+            <form action="{% url 'app:logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Выйти</button>
+            </form>
         </div>
 
         <div class="favorites-box">
             <div class="favorites-title">Ваши избранные формулы:</div>
             <ol class="favorites-list">
+                {% for favorite in favorites %}
                 <li>
                     <div class="formula-item">
-                        <div class="formula-text">E = mc<sup>2</sup></div>
-                        <button class="heart-btn" onclick="toggleLike(this)">
-                            <div class="heart-icon">♥</div>
+                        <div class="formula-text">{{ favorite.formula_text|safe }}</div>
+                        <button class="heart-btn" data-formula="{{ favorite.formula_text }}">
+                            <div class="heart-icon active">♥</div>
                         </button>
                     </div>
                 </li>
-                <li>
-                    <div class="formula-item">
-                        <div class="formula-text">E = mc<sup>2</sup></div>
-                        <button class="heart-btn" onclick="toggleLike(this)">
-                            <div class="heart-icon">♥</div>
-                        </button>
-                    </div>
-                </li>
-                <li>
-                    <div class="formula-item">
-                        <div class="formula-text">E = mc<sup>2</sup></div>
-                        <button class="heart-btn" onclick="toggleLike(this)">
-                            <div class="heart-icon">♥</div>
-                        </button>
-                    </div>
-                </li>
+                {% empty %}
+                <p>У вас пока нет избранных формул</p>
+                {% endfor %}
             </ol>
-            <a href="{% url 'app:home' %}" class="login-link">временная ссылка на главное меню</a>
         </div>
     {% else %}
         <div class="access-warning">
@@ -269,10 +252,30 @@
     </footer>
 
     <script>
-        function toggleLike(button) {
-            const heart = button.querySelector('.heart-icon');
-            heart.classList.toggle('active');
-        }
+        document.querySelectorAll('.heart-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const heart = this.querySelector('.heart-icon');
+                const formulaText = this.dataset.formula;
+
+                try {
+                    const response = await fetch('{% url "app:toggle_favorite" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: `formula_text=${encodeURIComponent(formulaText)}`
+                    });
+
+                    const data = await response.json();
+                    if(data.status === 'removed') {
+                        this.closest('li').remove();
+                    }
+                } catch(error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
     </script>
 </body>
 </html>
