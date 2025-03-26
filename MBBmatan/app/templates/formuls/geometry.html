@@ -11,6 +11,9 @@
             margin: 0;
             padding: 0;
             background: #f8f5e6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
@@ -24,9 +27,9 @@
         }
 
         .nav-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .logo {
@@ -48,8 +51,6 @@
             border-radius: 5px;
             transition: all 0.3s ease;
         }
-
-
 
         .login-btn {
             background: #2ecc71;
@@ -74,190 +75,50 @@
         }
 
         main {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
             padding: 20px;
-             margin-top: 80px;
+            flex: 1;
+        }
+
+        .search-wrapper {
+            background: #f8f5e6;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 25px;
+            border: 2px solid #c4b8a8;
+            border-radius: 30px;
+            font-size: 16px;
+            background: #fffcf5;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #9b59b6;
+            box-shadow: 0 0 12px rgba(155, 89, 182, 0.2);
+        }
+
+        .no-results {
+            text-align: center;
+            color: #6b5d4d;
+            padding: 30px 0;
+            display: none;
         }
 
         .block {
-            flex: 1;
-            min-width: 250px;
             margin: 10px;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .formulas { background: #3498db; color: white; }
-        .favorites { background: #e74c3c; color: white; }
-        .theory { background: #f1c40f; color: white; }
-        .notebook {
-            background: #9b59b6;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 500px;
-            padding: 0;
-        }
-
-        h2 {
-            margin-bottom: 10px;
-            text-align: center;
-            position: relative;
-        }
-
-        h2::after {
-        content: '';
-        display: block;
-        width: 50px;
-        height: 2px;
-        background: rgba(255, 255, 255, 0.3);
-        margin: 15px auto 20px;
-        }
-
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        ul li {
-            width: 100%;
-            text-align: center;
-        }
-
-        ul li a {
-            text-decoration: none;
-            color: inherit;
-            font-weight: bold;
-            display: inline-block;
-            padding: 8px 20px;
-            transition: all 0.3s ease;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 200px;
-        }
-
-        ul li:first-child {
-        margin-top: 60px;
-        }
-
-        ul li a:hover {
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .theory ul li a:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .notebook a {
-            text-decoration: none;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            transition: background 0.3s;
-            padding: 20px;
-            text-align: center;
-        }
-.notebook a:hover {
-            background: #8e44ad;
-        }
-
-        footer {
-            background: #777;
-            text-align: center;
-            padding: 10px;
-            color: white;
-            margin-top: 177px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .username {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-            transition: text-decoration 0.3s;
-        }
-
-        .username:hover {
-            text-decoration: underline;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
-        .container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            max-width: 400px;
-            margin: 50px auto;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .formula {
-            font-family: Arial, sans-serif;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .heart-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .heart {
-            font-size: 32px;
-            color: #666;
-            transition: color 0.3s ease;
-        }
-
-        .heart.active {
-            color: #ff4081;
-        }
-
-        .heart-btn:hover .heart {
-            transform: scale(1.1);
-        }
-
-        .heart-btn:active .heart {
-            transform: scale(0.9);
         }
 
         .geometry-terms {
@@ -266,15 +127,6 @@
             border-radius: 12px;
             padding: 30px;
             margin: 20px 0;
-        }
-
-        .geometry-terms h2 {
-            color: #6b5d4d;
-            font-size: 26px;
-            text-align: center;
-            margin-bottom: 35px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #c4b8a8;
         }
 
         .term-item {
@@ -307,6 +159,13 @@
             padding-left: 15px;
         }
 
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            margin-top: auto;
+        }
     </style>
 </head>
 <body>
@@ -326,9 +185,24 @@
         </nav>
     </header>
 
+    <div class="search-wrapper">
+        <div class="search-container">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Поиск по геометрическим терминам..."
+                autocomplete="off"
+            >
+        </div>
+    </div>
+
     <main>
         <div class="block geometry-terms">
             <h2>Основные геометрические понятия</h2>
+
+            <div class="no-results" id="noResults">
+                Ничего не найдено 😞 Попробуйте другой запрос
+            </div>
 
             <div class="term-item">
                 <h3>Точка, прямая, плоскость</h3>
@@ -420,11 +294,43 @@
                 <p>Прямоугольник, у которого все стороны равны.</p>
             </div>
         </div>
-
     </main>
 
     <footer>
         <p>Контакты: </p>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const terms = document.querySelectorAll('.term-item');
+            const noResults = document.getElementById('noResults');
+
+            function performSearch() {
+                const searchText = this.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                terms.forEach(term => {
+                    const content = term.textContent.toLowerCase();
+                    const isVisible = content.includes(searchText);
+
+                    term.style.display = isVisible ? 'block' : 'none';
+                    if(isVisible) visibleCount++;
+                });
+
+                noResults.style.display = visibleCount === 0 && searchText !== '' ? 'block' : 'none';
+            }
+
+            const debounceSearch = (func, delay = 300) => {
+                let timeout;
+                return function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, arguments), delay);
+                };
+            };
+
+            searchInput.addEventListener('input', debounceSearch(performSearch));
+        });
+    </script>
 </body>
 </html>
