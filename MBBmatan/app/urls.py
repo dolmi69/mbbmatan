@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, CustomLoginView, ProfileView, home, f_f, t_a, t_f, t_g
+from .views import RegisterView, CustomLoginView, ProfileView, home, f_f, t_a, t_f, t_g, da
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
@@ -22,6 +22,7 @@ urlpatterns = [
     path('t_a/', t_a, name='t_a'),
     path('t_g/', t_g, name='t_g'),
     path('t_f/', t_f, name='t_f'),
+    path('da/', da, name='da'),
     path('profile/', profile_view, name='profile'),
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('physics/', views.physics_formulas, name='physics_formulas'),

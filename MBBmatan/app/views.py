@@ -39,6 +39,9 @@ def t_a(request):
 def t_g(request):
     return render(request, 'formuls/geometry.html')
 
+def da(request):
+    return render(request, 'da.html')
+
 def t_f(request):
     return render(request, 'formuls/physics.html')
 
