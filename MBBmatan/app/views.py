@@ -121,3 +121,30 @@ def physics_formulas(request):
             formula['is_favorite'] = formula['text'] in user_favorites
 
     return render(request, 'f-f.html', {'formulas': formulas})
+
+
+from django.shortcuts import render
+from .models import FormulaQuestion
+
+
+def formula_quiz(request):
+    questions = FormulaQuestion.objects.all()
+
+    if request.method == 'POST':
+        score = 0
+        total = questions.count()
+
+        for question in questions:
+            user_answer = request.POST.get(f'question_{question.id}')
+            if user_answer == question.correct_answer:
+                score += 1
+
+        progress = int((score / total) * 100) if total > 0 else 0
+
+        return render(request, 'formuls/quiz_result.html', {
+            'score': score,
+            'total': total,
+            'progress': progress
+        })
+
+    return render(request, 'formuls/quiz.html', {'questions': questions})

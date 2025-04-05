@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Тестирование формул{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <h1 class="quiz-title">Проверьте свои знания</h1>
+
+    <form method="post" class="quiz-form">
+        {% csrf_token %}
+
+        {% for question in questions %}
+        <div class="question-card">
+            <div class="formula">{{ question.formula|safe }}</div>
+
+            <div class="options">
+                {% for option in question.options %}
+                <label class="option">
+                    <input type="radio"
+                           name="question_{{ question.id }}"
+                           value="{{ option }}"
+                           required>
+                    <span class="option-text">{{ option }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="submit-btn">Проверить ответы</button>
+    </form>
+</div>
+{% endblock %}

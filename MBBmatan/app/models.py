@@ -55,3 +55,12 @@ class FavoriteFormula(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.formula_text}"
+
+
+class FormulaQuestion(models.Model):
+    formula = models.CharField(max_length=100)
+    correct_answer = models.CharField(max_length=100)
+    options = models.JSONField(default=list)
+
+    def __str__(self):
+        return f"Вопрос по формуле: {self.formula}"
