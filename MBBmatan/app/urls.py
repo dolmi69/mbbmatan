@@ -27,6 +27,6 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'),
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('physics/', views.physics_formulas, name='physics_formulas'),
-    path('quiz/', formula_quiz, name='formula_quiz'),
+    path('quiz/', views.formula_quiz, name='formula_quiz'),
 
 ]

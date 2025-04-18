@@ -44,10 +44,6 @@ class Note(models.Model):
         return self.title
 
 
-
-
-from django.contrib.auth.models import User
-
 class FavoriteFormula(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     formula_text = models.CharField(max_length=255)
@@ -57,10 +53,12 @@ class FavoriteFormula(models.Model):
         return f"{self.user.username} - {self.formula_text}"
 
 
+
 class FormulaQuestion(models.Model):
-    formula = models.CharField(max_length=100)
-    correct_answer = models.CharField(max_length=100)
-    options = models.JSONField(default=list)
+    formula = models.CharField(max_length=200, verbose_name="Формула/Вопрос")
+    correct_answer = models.CharField(max_length=200, verbose_name="Правильный ответ")
+    options = models.JSONField(verbose_name="Варианты ответов", default=list)
 
     def __str__(self):
-        return f"Вопрос по формуле: {self.formula}"
+        return self.formula
+

@@ -12,6 +12,7 @@ from .models import Note
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import FavoriteFormula
 from django.http import JsonResponse
+from .models import FormulaQuestion
 
 
 class RegisterView(CreateView):

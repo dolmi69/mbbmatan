@@ -1,3 +1,4 @@
+<!-- app/templates/base.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -12,6 +13,7 @@
         <div class="logo">MATAN</div>
         <nav>
             <a href="{% url 'app:home' %}" class="nav-btn">Главная</a>
+            <a href="{% url 'app:formula_quiz' %}" class="nav-btn">Тест</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'app:profile' %}" class="nav-btn">Профиль</a>
             {% else %}
@@ -24,8 +26,5 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <p>Контакты: </p>
-    </footer>
 </body>
 </html>

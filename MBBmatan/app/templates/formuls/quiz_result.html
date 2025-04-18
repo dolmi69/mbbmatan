@@ -1,11 +1,11 @@
+<!-- app/templates/formuls/quiz_result.html -->
 {% extends 'base.html' %}
-
 {% block title %}Результаты теста{% endblock %}
 
 {% block content %}
 <div class="result-container">
     <div class="result-card">
-        <h2 class="result-title">Ваш результат</h2>
+        <h2 class="result-title">Ваш результат:</h2>
         <div class="score">
             Правильных ответов: <span class="correct">{{ score }}</span> из {{ total }}
         </div>
@@ -15,8 +15,8 @@
         </div>
 
         <div class="actions">
-            <a href="{% url 'app:formula_quiz' %}" class="btn-retry">Попробовать снова</a>
-            <a href="{% url 'app:home' %}" class="btn-home">На главную</a>
+            <a href="{% url 'app:formula_quiz' %}" class="btn">Попробовать снова</a>
+            <a href="{% url 'app:home' %}" class="btn">На главную</a>
         </div>
     </div>
 </div>

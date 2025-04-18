@@ -1,17 +1,17 @@
+<!-- app/templates/formuls/quiz.html -->
 {% extends 'base.html' %}
-
 {% block title %}Тестирование формул{% endblock %}
 
 {% block content %}
 <div class="quiz-container">
-    <h1 class="quiz-title">Проверьте свои знания</h1>
+    <h1 class="quiz-header">Проверка знаний формул</h1>
 
     <form method="post" class="quiz-form">
         {% csrf_token %}
 
         {% for question in questions %}
         <div class="question-card">
-            <div class="formula">{{ question.formula|safe }}</div>
+            <div class="formula">{{ question.formula }}</div>
 
             <div class="options">
                 {% for option in question.options %}
