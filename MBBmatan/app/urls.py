@@ -3,7 +3,7 @@ from .views import RegisterView, CustomLoginView, ProfileView, home, f_f, t_a, t
 from django.contrib.auth.views import LogoutView
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import toggle_favorite, profile_view
+from .views import toggle_favorite, profile
 from .views import formula_quiz
 
 app_name = "app"
@@ -24,7 +24,7 @@ urlpatterns = [
     path('t_g/', t_g, name='t_g'),
     path('t_f/', t_f, name='t_f'),
     path('da/', da, name='da'),
-    path('profile/', profile_view, name='profile'),
+    path('profile/', profile, name='profile'),
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('physics/', views.physics_formulas, name='physics_formulas'),
     path('quiz/', views.formula_quiz, name='formula_quiz'),

@@ -12,7 +12,8 @@ from .models import Note
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import FavoriteFormula
 from django.http import JsonResponse
-from .models import FormulaQuestion
+from django.utils import timezone
+from .models import FormulaQuestion, TestAttempt
 
 
 class RegisterView(CreateView):
@@ -99,12 +100,21 @@ def toggle_favorite(request):
         return JsonResponse({'status': 'added'})
     return JsonResponse({'status': 'error'}, status=400)
 
-def profile_view(request):
-    if request.user.is_authenticated:
-        favorites = FavoriteFormula.objects.filter(user=request.user)
-        return render(request, 'profile.html', {'favorites': favorites})
-    return redirect('login')
 
+def profile(request):
+    if request.user.is_authenticated:
+        attempts = TestAttempt.objects.filter(user=request.user).order_by('-date')[:5] #отображаем последнии 5 попыток можем менять как хотим
+        total_attempts = attempts.count()
+        total_correct = sum([a.correct_answers for a in attempts])
+
+        context = {
+            'user': request.user,
+            'attempts': attempts,
+            'total_attempts': total_attempts,
+            'total_correct': total_correct,
+        }
+        return render(request, 'profile.html', context)
+    return redirect('login')
 
 def physics_formulas(request):
     formulas = [
@@ -127,6 +137,9 @@ def physics_formulas(request):
 from django.shortcuts import render
 from .models import FormulaQuestion
 
+from django.utils import timezone
+from .models import FormulaQuestion, TestAttempt
+
 
 def formula_quiz(request):
     questions = FormulaQuestion.objects.all()
@@ -139,6 +152,14 @@ def formula_quiz(request):
             user_answer = request.POST.get(f'question_{question.id}')
             if user_answer == question.correct_answer:
                 score += 1
+
+        #сохраняем попытку(все комментарии потом удалю)
+        if request.user.is_authenticated:
+            TestAttempt.objects.create(
+                user=request.user,
+                correct_answers=score,
+                total_questions=total
+            )
 
         progress = int((score / total) * 100) if total > 0 else 0
 

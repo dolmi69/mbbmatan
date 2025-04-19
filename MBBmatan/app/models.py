@@ -62,3 +62,36 @@ class FormulaQuestion(models.Model):
     def __str__(self):
         return self.formula
 
+
+class TestAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    correct_answers = models.IntegerField()
+    total_questions = models.IntegerField()
+
+    def success_percent(self):
+        return int((self.correct_answers / self.total_questions) * 100)
+
+class TestAnswer(models.Model):
+    text = models.TextField()
+    image = models.ImageField(default=None, null=True, blank=True)
+    right = models.BooleanField()
+
+class TestData(models.Model):
+
+    class TypeChoices(models.TextChoices):
+        many = "many", "many"
+        input = "input", "input"
+    text = models.TextField()
+    image = models.ImageField(default=None, null=True, blank=True)
+    type = models.CharField(choices=TypeChoices.choices, default="many")
+    choices_count = models.IntegerField(default=1)
+    answers = models.ForeignKey(to=TestAnswer, on_delete=models.CASCADE, related_name="test")
+
+
+class UserAnswer(models.Model):
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="answers")
+    answer = models.ForeignKey(to=TestAnswer, on_delete=models.CASCADE, related_name="users")
+    date = models.DateTimeField(auto_now_add=True)
+
+
