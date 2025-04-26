@@ -218,7 +218,7 @@
         <div class="favorites-box">
             <div class="favorites-title">Ваши избранные формулы:</div>
             <ol class="favorites-list">
-                {% for favorite in favorites %}
+                {% for favorite in user.favoriteformula_set.all %}
                 <li>
                     <div class="formula-item">
                         <div class="formula-text">{{ favorite.formula_text|safe }}</div>

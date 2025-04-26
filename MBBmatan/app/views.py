@@ -53,8 +53,20 @@ class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
 
 
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'profile.html'
+def profile(request):
+    if request.user.is_authenticated:
+        attempts = TestAttempt.objects.filter(user=request.user).order_by('-date')[:5]
+        favorites = FavoriteFormula.objects.filter(user=request.user)  # Новая строка
+
+        context = {
+            'user': request.user,
+            'attempts': attempts,
+            'total_attempts': attempts.count(),
+            'total_correct': sum([a.correct_answers for a in attempts]),
+            'favorites': favorites,  # Добавляем в контекст
+        }
+        return render(request, 'profile.html', context)
+    return redirect('login')
 
 class NoteListView(LoginRequiredMixin, ListView):
     model = Note

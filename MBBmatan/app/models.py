@@ -1,6 +1,12 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 
 # Модель для хранения формул
 class Formulas(models.Model):
@@ -66,11 +72,19 @@ class FormulaQuestion(models.Model):
 class TestAttempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    correct_answers = models.IntegerField()
-    total_questions = models.IntegerField()
+    correct_answers = models.IntegerField(default=0)
+    total_questions = models.IntegerField(default=0)
 
     def success_percent(self):
-        return int((self.correct_answers / self.total_questions) * 100)
+        if self.total_questions == 0:
+            return 0
+        return round((self.correct_answers / self.total_questions) * 100, 2)
+
+    def clean(self):
+        if self.total_questions < 0:
+            raise ValidationError("Total questions cannot be negative.")
+        if self.correct_answers < 0:
+            raise ValidationError("Correct answers cannot be negative.")
 
 class TestAnswer(models.Model):
     text = models.TextField()
@@ -78,13 +92,12 @@ class TestAnswer(models.Model):
     right = models.BooleanField()
 
 class TestData(models.Model):
-
     class TypeChoices(models.TextChoices):
         many = "many", "many"
         input = "input", "input"
     text = models.TextField()
     image = models.ImageField(default=None, null=True, blank=True)
-    type = models.CharField(choices=TypeChoices.choices, default="many")
+    type = models.CharField(choices=TypeChoices.choices,max_length=200, default="many")
     choices_count = models.IntegerField(default=1)
     answers = models.ForeignKey(to=TestAnswer, on_delete=models.CASCADE, related_name="test")
 
