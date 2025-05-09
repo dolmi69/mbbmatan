@@ -72,8 +72,7 @@ TEMPLATES = [
 
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/home/'
-LOGOUT_REDIRECT_URL = '/home/'
-LOGIN_URL = '/accounts/login/'
+LOGIN_URL = '/login/'
 
 WSGI_APPLICATION = 'MBBmatan.wsgi.application'
 

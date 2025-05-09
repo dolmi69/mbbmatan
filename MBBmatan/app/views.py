@@ -19,7 +19,7 @@ from .models import FormulaQuestion, TestAttempt
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'registration/signup.html'
-    success_url = '/accounts/login/'
+    success_url = reverse_lazy('app:login')
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
@@ -126,7 +126,7 @@ def profile(request):
             'total_correct': total_correct,
         }
         return render(request, 'profile.html', context)
-    return redirect('login')
+    return redirect('/accounts/login/')
 
 def physics_formulas(request):
     formulas = [
