@@ -145,14 +145,6 @@ def physics_formulas(request):
 
     return render(request, 'f-f.html', {'formulas': formulas})
 
-
-from django.shortcuts import render
-from .models import FormulaQuestion
-
-from django.utils import timezone
-from .models import FormulaQuestion, TestAttempt
-
-
 def formula_quiz(request):
     questions = FormulaQuestion.objects.all()
 
