@@ -28,5 +28,6 @@ urlpatterns = [
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('physics/', views.physics_formulas, name='physics_formulas'),
     path('quiz/', views.formula_quiz, name='formula_quiz'),
+    path('quiz/result/', views.quiz_result, name='quiz_result'),
 
 ]

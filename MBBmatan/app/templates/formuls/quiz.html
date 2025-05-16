@@ -1,25 +1,39 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block content %}
-<div class="container">
-    <h2>Тест по формулам</h2>
+<div class="quiz-container">
+    <div class="progress-bar">
+        <div class="progress" style="width: {{ current_number|div:total_questions|multiply:100 }}%"></div>
+    </div>
+
+    <h2>Вопрос {{ current_number }} из {{ total_questions }}</h2>
+
     <form method="post">
         {% csrf_token %}
-        {% for question in questions %}
-        <div class="question">
-            <h4>{{ question.formula }}</h4>
-            {% for option in question.options %}
-            <label>
-                <input type="radio"
-                       name="question_{{ question.id }}"
-                       value="{{ option }}"
-                       required>
-                {{ option }}
-            </label>
-            {% endfor %}
+        <div class="question-card">
+            <h3>{{ question.formula }}</h3>
+
+            <div class="options">
+                {% for option in question.options %}
+                <label class="option">
+                    <input type="radio"
+                           name="answer"
+                           value="{{ option }}"
+                           required>
+                    {{ option }}
+                </label>
+                {% endfor %}
+            </div>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn">Отправить ответы</button>
+
+        <button type="submit" class="btn">
+            {% if current_number == total_questions %}
+                Завершить тест
+            {% else %}
+                Следующий вопрос →
+            {% endif %}
+        </button>
     </form>
 </div>
 {% endblock %}
