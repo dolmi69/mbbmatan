@@ -77,6 +77,13 @@ LOGIN_URL = '/login/'
 WSGI_APPLICATION = 'MBBmatan.wsgi.application'
 
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_AGE = 604800  #настройка для сессий 1 неделя
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 

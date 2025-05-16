@@ -1,46 +1,20 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 
-
 User = get_user_model()
 
-
-# Модель для хранения формул
 class Formulas(models.Model):
-    content = models.CharField(max_length=255)  # Сама формула
-    topic = models.CharField(max_length=100)    # Тема, к которой относится формула
-    description = models.TextField(blank=True, null=True)  # Описание формулы
+    content = models.CharField(max_length=255)
+    topic = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
 
-
-
-# Модель для хранения теории
 class Theory(models.Model):
-    content = models.TextField()  # Теоретический материал
-    topic = models.CharField(max_length=100)  # Тема, к которой относится теория
-
-
-
-# Модель для избранных формул пользователя
-class FavFormulas(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Связь с пользователем
-    formula = models.ForeignKey(Formulas, on_delete=models.CASCADE)  # Связь с формулой
-
-    class Meta:
-        unique_together = ('user', 'formula')  # Уникальность пары пользователь-формула
-
-    def __str__(self):
-        return f"{self.user.username} - {self.formula.topic}"
-
-
-
-
-
+    content = models.TextField()
+    topic = models.CharField(max_length=100)
 
 class Note(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -52,15 +26,10 @@ class Note(models.Model):
     def __str__(self):
         return self.title
 
-
 class FavoriteFormula(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     formula_text = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.formula_text}"
-
 
 class FormulaQuestion(models.Model):
     formula = models.CharField("Вопрос", max_length=200)
@@ -71,6 +40,14 @@ class FormulaQuestion(models.Model):
     def __str__(self):
         return self.formula
 
+class TestAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    correct_answers = models.IntegerField(default=0)
+    total_questions = models.IntegerField(default=0)
+
+    def success_percent(self):
+        return round((self.correct_answers / self.total_questions) * 100, 2) if self.total_questions > 0 else 0
 
 @receiver(post_migrate)
 def create_initial_questions(sender, **kwargs):
@@ -100,53 +77,64 @@ def create_initial_questions(sender, **kwargs):
                 "formula": "Пример простого механизма:",
                 "correct_answer": "Рычаг",
                 "options": ["Динамометр", "Амперметр", "Рычаг", "Манометр"]
+            },
+            {
+                "formula": "Формула расчета давления:",
+                "correct_answer": "P = F/S",
+                "options": ["P = m/V", "P = F/S", "E = mc²", "v = a·t"]
+            },
+            {
+                "formula": "Единица измерения работы:",
+                "correct_answer": "Джоуль",
+                "options": ["Ньютон", "Паскаль", "Джоуль", "Ватт"]
+            },
+            {
+                "formula": "Что характеризует инерция тела?",
+                "correct_answer": "Способность сохранять скорость",
+                "options": ["Способность совершать работу", "Способность сохранять скорость", "Массу тела", "Энергию тела"]
+            },
+            {
+                "formula": "Формула механической работы:",
+                "correct_answer": "A = F·s",
+                "options": ["A = m·g·h", "A = F·s", "A = P·t", "A = I·U"]
+            },
+            {
+                "formula": "Устройство для измерения силы:",
+                "correct_answer": "Динамометр",
+                "options": ["Барометр", "Амперметр", "Динамометр", "Манометр"]
+            },
+            {
+                "formula": "Закон Ома для участка цепи:",
+                "correct_answer": "I = U/R",
+                "options": ["I = U/R", "Q = I·t", "P = I²·R", "U = A/q"]
+            },
+            {
+                "formula": "Формула кинетической энергии:",
+                "correct_answer": "E = mv²/2",
+                "options": ["E = mgh", "E = mv²/2", "E = kx²/2", "E = Q/Δt"]
+            },
+            {
+                "formula": "Единица измерения мощности:",
+                "correct_answer": "Ватт",
+                "options": ["Джоуль", "Вольт", "Ампер", "Ватт"]
+            },
+            {
+                "formula": "Формула потенциальной энергии:",
+                "correct_answer": "E = mgh",
+                "options": ["E = mv²/2", "E = kx²/2", "E = mgh", "E = Q/Δt"]
+            },
+            {
+                "formula": "Первый закон термодинамики:",
+                "correct_answer": "Q = ΔU + A",
+                "options": ["Q = cmΔT", "Q = ΔU + A", "A = N·t", "P = ρgh"]
             }
         ]
 
         for q in initial_questions:
-            if not FormulaQuestion.objects.filter(formula=q['formula']).exists():
-                FormulaQuestion.objects.create(
-                    formula=q['formula'],
-                    correct_answer=q['correct_answer'],
-                    options=q['options']
-                )
-
-class TestAttempt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    correct_answers = models.IntegerField(default=0)
-    total_questions = models.IntegerField(default=0)
-
-    def success_percent(self):
-        if self.total_questions == 0:
-            return 0
-        return round((self.correct_answers / self.total_questions) * 100, 2)
-
-    def clean(self):
-        if self.total_questions < 0:
-            raise ValidationError("Total questions cannot be negative.")
-        if self.correct_answers < 0:
-            raise ValidationError("Correct answers cannot be negative.")
-
-class TestAnswer(models.Model):
-    text = models.TextField()
-    image = models.ImageField(default=None, null=True, blank=True)
-    right = models.BooleanField()
-
-class TestData(models.Model):
-    class TypeChoices(models.TextChoices):
-        many = "many", "many"
-        input = "input", "input"
-    text = models.TextField()
-    image = models.ImageField(default=None, null=True, blank=True)
-    type = models.CharField(choices=TypeChoices.choices,max_length=200, default="many")
-    choices_count = models.IntegerField(default=1)
-    answers = models.ForeignKey(to=TestAnswer, on_delete=models.CASCADE, related_name="test")
-
-
-class UserAnswer(models.Model):
-    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="answers")
-    answer = models.ForeignKey(to=TestAnswer, on_delete=models.CASCADE, related_name="users")
-    date = models.DateTimeField(auto_now_add=True)
-
-
+            FormulaQuestion.objects.get_or_create(
+                formula=q['formula'],
+                defaults={
+                    'correct_answer': q['correct_answer'],
+                    'options': q['options']
+                }
+            )

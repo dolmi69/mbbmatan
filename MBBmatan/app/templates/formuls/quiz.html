@@ -1,33 +1,25 @@
-<!-- app/templates/formuls/quiz.html -->
 {% extends 'base.html' %}
-{% block title %}Тестирование формул{% endblock %}
 
 {% block content %}
-<div class="quiz-container">
-    <h1 class="quiz-header">Проверка знаний формул</h1>
-
-    <form method="post" class="quiz-form">
+<div class="container">
+    <h2>Тест по формулам</h2>
+    <form method="post">
         {% csrf_token %}
-
         {% for question in questions %}
-        <div class="question-card">
-            <div class="formula">{{ question.formula }}</div>
-
-            <div class="options">
-                {% for option in question.options %}
-                <label class="option">
-                    <input type="radio"
-                           name="question_{{ question.id }}"
-                           value="{{ option }}"
-                           required>
-                    <span class="option-text">{{ option }}</span>
-                </label>
-                {% endfor %}
-            </div>
+        <div class="question">
+            <h4>{{ question.formula }}</h4>
+            {% for option in question.options %}
+            <label>
+                <input type="radio"
+                       name="question_{{ question.id }}"
+                       value="{{ option }}"
+                       required>
+                {{ option }}
+            </label>
+            {% endfor %}
         </div>
         {% endfor %}
-
-        <button type="submit" class="submit-btn">Проверить ответы</button>
+        <button type="submit" class="btn">Отправить ответы</button>
     </form>
 </div>
 {% endblock %}

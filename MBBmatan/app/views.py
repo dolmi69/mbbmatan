@@ -145,19 +145,30 @@ def physics_formulas(request):
 
     return render(request, 'f-f.html', {'formulas': formulas})
 
-def formula_quiz(request):
-    questions = FormulaQuestion.objects.all()
 
-    if request.method == 'POST':
+def formula_quiz(request):
+    all_questions = FormulaQuestion.objects.all()
+    if all_questions.count() < 5:
+        return render(request, 'error.html', {
+            'message': 'Для проведения теста требуется минимум 5 вопросов в базе'
+        })
+    if request.method == 'GET':
+        random_questions = list(all_questions.order_by('?')[:5])
+        request.session['quiz_questions'] = [q.id for q in random_questions]
+        return render(request, 'formuls/quiz.html', {'questions': random_questions})
+
+    elif request.method == 'POST':
+        question_ids = request.session.get('quiz_questions', [])
+        questions = FormulaQuestion.objects.filter(id__in=question_ids)
+
         score = 0
-        total = questions.count()
+        total = len(questions)
 
         for question in questions:
             user_answer = request.POST.get(f'question_{question.id}')
             if user_answer == question.correct_answer:
                 score += 1
 
-        #сохраняем попытку(все комментарии потом удалю)
         if request.user.is_authenticated:
             TestAttempt.objects.create(
                 user=request.user,
@@ -167,10 +178,11 @@ def formula_quiz(request):
 
         progress = int((score / total) * 100) if total > 0 else 0
 
+        if 'quiz_questions' in request.session:
+            del request.session['quiz_questions']
+
         return render(request, 'formuls/quiz_result.html', {
             'score': score,
             'total': total,
             'progress': progress
         })
-
-    return render(request, 'formuls/quiz.html', {'questions': questions})
