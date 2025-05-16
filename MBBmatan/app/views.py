@@ -15,7 +15,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from .models import FormulaQuestion, TestAttempt
 from django.views.decorators.http import require_http_methods
-
+import random
 
 class RegisterView(CreateView):
     form_class = RegisterForm
@@ -148,16 +148,18 @@ def physics_formulas(request):
 
 
 def formula_quiz(request):
-    if 'quiz_in_progress' not in request.session:
-        request.session['quiz_in_progress'] = True
+    if 'quiz_questions' not in request.session:
+        all_questions = list(FormulaQuestion.objects.all())
+
+        if len(all_questions) < 5:
+            return render(request, 'error.html', {'message': 'Недостаточно вопросов для теста'})
+
+        request.session['quiz_questions'] = [q.id for q in random.sample(all_questions, 5)]
         request.session['current_question'] = 0
         request.session['score'] = 0
-        all_questions = list(FormulaQuestion.objects.order_by('?')[:15])
-        request.session['question_ids'] = [q.id for q in all_questions]
-        request.session['total_questions'] = len(all_questions)
 
-    question_ids = request.session.get('question_ids', [])
-    current_idx = request.session.get('current_question', 0)
+    question_ids = request.session['quiz_questions']
+    current_idx = request.session['current_question']
 
     if current_idx >= len(question_ids):
         return redirect('app:quiz_result')
@@ -169,13 +171,15 @@ def formula_quiz(request):
 
     if request.method == 'POST':
         user_answer = request.POST.get('answer')
-        correct_answer = question.correct_answer
-
-        if user_answer == correct_answer:
+        if user_answer == question.correct_answer:
             request.session['score'] += 1
 
         request.session['current_question'] += 1
         request.session.modified = True
+
+        if request.session['current_question'] >= len(question_ids):
+            return redirect('app:quiz_result')
+
         return redirect('app:formula_quiz')
 
     return render(request, 'formuls/quiz.html', {
@@ -186,12 +190,11 @@ def formula_quiz(request):
 
 
 def quiz_result(request):
-    if not request.session.get('quiz_in_progress'):
+    if 'quiz_questions' not in request.session:
         return redirect('app:formula_quiz')
 
     score = request.session.get('score', 0)
-    total = request.session.get('total_questions', 1)
-    progress = int((score / total) * 100) if total > 0 else 0
+    total = len(request.session['quiz_questions'])
 
     if request.user.is_authenticated:
         TestAttempt.objects.create(
@@ -200,9 +203,12 @@ def quiz_result(request):
             total_questions=total
         )
 
-    del request.session['quiz_in_progress']
+    del request.session['quiz_questions']
+    del request.session['current_question']
+    del request.session['score']
+
     return render(request, 'formuls/quiz_result.html', {
         'score': score,
         'total': total,
-        'progress': progress
+        'progress': int((score / total) * 100) if total > 0 else 0
     })
