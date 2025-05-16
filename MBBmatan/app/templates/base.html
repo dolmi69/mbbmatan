@@ -1,23 +1,97 @@
-<!-- app/templates/base.html -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATAN - {% block title %}{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>{% block title %}MATAN{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            color: white;
+            background: black;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn {
+            background: #2ecc71;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .login-btn:hover {
+            background: #27ae60;
+        }
+
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            margin-top: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .username {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header>
         <div class="logo">MATAN</div>
         <nav>
-            <a href="{% url 'app:home' %}" class="nav-btn">Главная</a>
-            <a href="{% url 'app:formula_quiz' %}" class="nav-btn">Тест</a>
             {% if user.is_authenticated %}
-                <a href="{% url 'app:profile' %}" class="nav-btn">Профиль</a>
+                <div class="user-info">
+                    <a href="{% url 'app:profile' %}" class="username">{{ user.username }}</a>
+                    <a href="{% url 'app:logout' %}" class="nav-btn">Выход</a>
+                </div>
             {% else %}
-                <a href="{% url 'app:login' %}" class="nav-btn">Войти</a>
+                <a href="{% url 'app:login' %}" class="login-btn">Войти</a>
+                <a href="{% url 'app:signup' %}" class="nav-btn">Регистрация</a>
             {% endif %}
         </nav>
     </header>
@@ -26,5 +100,8 @@
         {% block content %}{% endblock %}
     </main>
 
+    <footer>
+        <p>Контакты:</p>
+    </footer>
 </body>
 </html>
