@@ -24,9 +24,9 @@
         }
 
         .nav-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
         .logo {
@@ -48,8 +48,6 @@
             border-radius: 5px;
             transition: all 0.3s ease;
         }
-
-
 
         .login-btn {
             background: #2ecc71;
@@ -78,7 +76,7 @@
             justify-content: space-around;
             flex-wrap: wrap;
             padding: 20px;
-             margin-top: 80px;
+            margin-top: 80px;
         }
 
         .block {
@@ -91,8 +89,8 @@
         }
 
         .formulas { background: #3498db; color: white; }
-        .favorites { background: #e74c3c; color: white; }
         .theory { background: #e74c3c; color: white; }
+        .quiz-button { background: #4CAF50; color: white; }
         .notebook {
             background: #9b59b6;
             position: relative;
@@ -110,14 +108,13 @@
         }
 
         h2::after {
-        content: '';
-        display: block;
-        width: 50px;
-        height: 2px;
-        background: rgba(255, 255, 255, 0.3);
-        margin: 15px auto 20px;
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 15px auto 20px;
         }
-
 
         ul {
             list-style: none;
@@ -147,7 +144,7 @@
         }
 
         ul li:first-child {
-        margin-top: 60px;
+            margin-top: 60px;
         }
 
         ul li a:hover {
@@ -155,10 +152,7 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .theory ul li a:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
+        .quiz-button a,
         .notebook a {
             text-decoration: none;
             color: white;
@@ -175,6 +169,10 @@
             text-align: center;
         }
 
+        .quiz-button:hover {
+            background: #45a049;
+        }
+
         .notebook a:hover {
             background: #8e44ad;
         }
@@ -184,7 +182,7 @@
             text-align: center;
             padding: 10px;
             color: white;
-            margin-top: 177px;
+            margin-top: 550px;
         }
 
         .user-info {
@@ -254,13 +252,17 @@
             </ul>
         </section>
 
+        <section class="block quiz-button">
+            <a href="{% url 'app:formula_quiz' %}">Начать тест</a>
+        </section>
+
         <section class="block notebook">
             <a href="{% url 'app:note_list' %}">Перейти в блокнот</a>
         </section>
     </main>
 
     <footer>
-        <p>Контакты: </p>
+        <p>Контакты: @Artem_hvhv</p>
     </footer>
 </body>
 </html>
