@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ room.name }} | Чат{% endblock %}
+
+{% block content %}
+<div class="chat-room-container">
+    <div class="chat-header">
+        <a href="{% url 'app:chat_home' %}" class="back-btn">← Назад</a>
+        <h1>{{ room.name }}</h1>
+        <p>{{ room.description }}</p>
+    </div>
+    
+    <div class="messages-container" id="messagesContainer">
+        {% for message in messages %}
+        <div class="message {% if message.sender == user %}own-message{% endif %}">
+            <div class="message-header">
+                <strong>{{ message.sender.username }}</strong>
+                <small>{{ message.timestamp|date:"H:i" }}</small>
+            </div>
+            <div class="message-content">
+                {{ message.message }}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-message">
+            <p>Пока нет сообщений. Будьте первым!</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="message-input">
+        <form id="messageForm">
+            {% csrf_token %}
+            <input type="text" placeholder="Введите сообщение..." id="messageInput" autocomplete="off">
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<style>
+.chat-room-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+.chat-header {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.back-btn {
+    text-decoration: none;
+    color: #4361ee;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.message {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+.own-message {
+    background: #4361ee;
+    color: white;
+    margin-left: auto;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.message-content {
+    word-wrap: break-word;
+}
+
+.message-input {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.message-input form {
+    display: flex;
+    gap: 10px;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 16px;
+}
+
+.message-input button {
+    padding: 12px 30px;
+    background: #4361ee;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+}
+</style>
+
+<script>
+// Простой AJAX для отправки сообщений (позже доработаем)
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    
+    if (message) {
+        alert('Сообщение отправлено: ' + message);
+        input.value = '';
+    }
+});
+</script>
+{% endblock %}

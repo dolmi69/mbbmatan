@@ -134,6 +134,13 @@
             text-decoration: none;
             transition: background 0.3s;
             display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-logout:hover {
+            background: #c0392b;
         }
 
         .favorites-list {
@@ -167,6 +174,25 @@
             bottom: 0;
             width: 100%;
         }
+
+        /* Стиль для кнопки друзей */
+        .btn-friends {
+            display: inline-block;
+            background: #9b59b6;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        .btn-friends:hover {
+            background: #8e44ad;
+            color: white;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -180,7 +206,14 @@
         <div class="profile-info">
             <div class="profile-title">Ваш профиль</div>
             <div class="username">{{ user.username }}</div>
-            <form action="{% url 'app:logout' %}" method="post">
+
+            <!-- Кнопка управления друзьями -->
+            <div style="margin-top: 15px;">
+                <a href="{% url 'app:manage_friends' %}" class="btn-friends">👥 Управление друзьями</a>
+            </div>
+
+            <!-- Кнопка выхода -->
+            <form action="{% url 'app:logout' %}" method="post" style="margin-top: 15px;">
                 {% csrf_token %}
                 <button type="submit" class="btn-logout">Выйти</button>
             </form>

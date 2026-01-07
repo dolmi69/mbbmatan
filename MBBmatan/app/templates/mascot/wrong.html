@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bear Crossed Arms</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #e6d3a3 0%, #d2b48c 100%);
+        }
+
+        .bear-container {
+            width: 400px;
+            height: 400px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+
+        @keyframes head-shake {
+            0% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-5deg);
+            }
+            50% {
+                transform: rotate(0deg);
+            }
+            75% {
+                transform: rotate(5deg);
+            }
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        @keyframes left-arm-move {
+            0%, 100% {
+                transform: scale(1) rotate(45deg) translate(0, 0);
+            }
+            25% {
+                transform: scale(1.1) rotate(45deg) translate(10px, -5px);
+            }
+            50% {
+                transform: scale(0.9) rotate(45deg) translate(20px, -10px);
+            }
+            75% {
+                transform: scale(1.05) rotate(45deg) translate(10px, -5px);
+            }
+        }
+
+        @keyframes right-arm-move {
+            0%, 100% {
+                transform: scale(1) rotate(-45deg) translate(0, 0);
+            }
+            25% {
+                transform: scale(1.1) rotate(-45deg) translate(-10px, -5px);
+            }
+            50% {
+                transform: scale(0.9) rotate(-45deg) translate(-20px, -10px);
+            }
+            75% {
+                transform: scale(1.05) rotate(-45deg) translate(-10px, -5px);
+            }
+        }
+
+        .head-group {
+            animation: head-shake 3s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        .left-arm {
+            animation: left-arm-move 1.5s ease-in-out infinite;
+            transform-origin: 130px 220px;
+        }
+
+        .right-arm {
+            animation: right-arm-move 1.5s ease-in-out infinite;
+            transform-origin: 170px 220px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bear-container">
+        <svg viewBox="0 0 300 300">
+            <defs>
+                <linearGradient id="furGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#8B4513"/>
+                    <stop offset="100%" stop-color="#A0522D"/>
+                </linearGradient>
+                <linearGradient id="jacketGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#2a2a2a"/>
+                    <stop offset="100%" stop-color="#1a1a1a"/>
+                </linearGradient>
+                <linearGradient id="tieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#B22222"/>
+                    <stop offset="100%" stop-color="#8B0000"/>
+                </linearGradient>
+                <filter id="anime-shadow">
+                    <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+                </filter>
+            </defs>
+
+            <path d="M100 180 Q150 250 200 180 L200 250 Q150 300 100 250 Z" fill="url(#furGradient)" filter="url(#anime-shadow)"/>
+
+            <g>
+                <path d="M50 120 Q30 170 80 250 Q150 280 220 250 Q270 170 250 120" fill="url(#jacketGradient)" stroke="#151515" stroke-width="3"/>
+                <path d="M150 140 Q160 160 170 140 L170 200 Q160 220 150 200 Z" fill="#333333" stroke="#252525" stroke-width="2"/>
+                <path d="M150 140 Q140 160 130 140 L130 200 Q140 220 150 200 Z" fill="#333333" stroke="#252525" stroke-width="2"/>
+                <path d="M110 190 Q120 200 130 190" fill="none" stroke="#404040" stroke-width="2"/>
+                <path d="M170 190 Q180 200 190 190" fill="none" stroke="#404040" stroke-width="2"/>
+                <circle cx="150" cy="160" r="4" fill="#505050"/>
+                <circle cx="150" cy="180" r="4" fill="#505050"/>
+                <circle cx="150" cy="200" r="4" fill="#505050"/>
+            </g>
+
+            <g>
+                <path d="M145 170 L150 210 155 170 Z" fill="url(#tieGradient)"/>
+                <path d="M140 210 Q150 230 160 210 L150 250 Z" fill="url(#tieGradient)"/>
+                <path d="M145 170 L150 210 155 170" fill="none" stroke="#600000" stroke-width="2"/>
+            </g>
+
+            <g class="head-group">
+                <circle cx="150" cy="110" r="50" fill="url(#furGradient)" filter="url(#anime-shadow)"/>
+                <path d="M105 90 Q85 80 125 60" fill="url(#furGradient)"/>
+                <path d="M195 90 Q215 80 175 60" fill="url(#furGradient)"/>
+                <path d="M110 95 Q120 85 130 95" fill="none" stroke="#4A2810" stroke-width="4" stroke-linecap="round"/>
+                <path d="M190 95 Q180 85 170 95" fill="none" stroke="#4A2810" stroke-width="4" stroke-linecap="round"/>
+                <circle cx="125" cy="110" r="20" fill="#FFFFFF"/>
+                <circle cx="175" cy="110" r="20" fill="#FFFFFF"/>
+                <circle cx="125" cy="110" r="8" fill="#2B1100"/>
+                <circle cx="175" cy="110" r="8" fill="#2B1100"/>
+                <circle cx="130" cy="105" r="3" fill="#FFFFFF"/>
+                <circle cx="180" cy="105" r="3" fill="#FFFFFF"/>
+                <ellipse cx="150" cy="130" rx="10" ry="8" fill="#4A2810"/>
+                <path d="M125 145 Q150 155 175 145" fill="none" stroke="#4A2810" stroke-width="4" stroke-linecap="round"/>
+
+                <g>
+                    <path d="M90 100 Q130 80 210 100" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="130" cy="110" r="22" fill="none" stroke="#333" stroke-width="4"/>
+                    <circle cx="170" cy="110" r="22" fill="none" stroke="#333" stroke-width="4"/>
+                    <path d="M130 100 Q135 95 140 100" fill="none" stroke="white" stroke-width="2"/>
+                    <path d="M170 100 Q175 95 180 100" fill="none" stroke="white" stroke-width="2"/>
+                </g>
+            </g>
+
+            <g class="left-arm">
+                <ellipse cx="130" cy="220" rx="30" ry="50" fill="url(#furGradient)" stroke="#6B371A" stroke-width="2"/>
+                <ellipse cx="145" cy="165" rx="22" ry="30" fill="url(#furGradient)" stroke="#6B371A" stroke-width="2"/>
+                <path d="M150 155 Q165 145 175 160" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+                <path d="M150 160 Q160 150 170 165" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+                <path d="M153 163 Q158 155 168 168" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+            </g>
+
+            <g class="right-arm">
+                <ellipse cx="170" cy="220" rx="30" ry="50" fill="url(#furGradient)" stroke="#6B371A" stroke-width="2"/>
+                <ellipse cx="155" cy="165" rx="22" ry="30" fill="url(#furGradient)" stroke="#6B371A" stroke-width="2"/>
+                <path d="M150 155 Q135 145 125 160" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+                <path d="M150 160 Q140 150 130 165" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+                <path d="M147 163 Q142 155 132 168" fill="none" stroke="#6B371A" stroke-width="2" stroke-linecap="round"/>
+            </g>
+
+        </svg>
+    </div>
+</body>
+</html>

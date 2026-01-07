@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app.context_processors.user_profile'
             ],
             'libraries': {
                 'custom_filters': 'app.templatetags.custom_filters',
@@ -72,6 +73,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/home/'
