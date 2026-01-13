@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль MATAN</title>
     <style>
-        /* Существующие стили */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -40,7 +39,6 @@
             max-width: 300px;
         }
 
-        /* Новые стили для статистики */
         .stats-box {
             background: white;
             padding: 40px;
@@ -100,7 +98,6 @@
             border-radius: 8px;
         }
 
-        /* Остальные существующие стили */
         .nav-btn {
             text-decoration: none;
             color: white;
@@ -175,7 +172,6 @@
             width: 100%;
         }
 
-        /* Стиль для кнопки друзей */
         .btn-friends {
             display: inline-block;
             background: #9b59b6;
@@ -207,19 +203,16 @@
             <div class="profile-title">Ваш профиль</div>
             <div class="username">{{ user.username }}</div>
 
-            <!-- Кнопка управления друзьями -->
             <div style="margin-top: 15px;">
                 <a href="{% url 'app:manage_friends' %}" class="btn-friends">👥 Управление друзьями</a>
             </div>
 
-            <!-- Кнопка выхода -->
             <form action="{% url 'app:logout' %}" method="post" style="margin-top: 15px;">
                 {% csrf_token %}
                 <button type="submit" class="btn-logout">Выйти</button>
             </form>
         </div>
 
-        <!-- Блок статистики -->
         <div class="stats-box">
             <h2 class="stats-title">Статистика тестов</h2>
 
@@ -247,7 +240,6 @@
             </div>
         </div>
 
-        <!-- Существующий блок избранного -->
         <div class="favorites-box">
             <div class="favorites-title">Ваши избранные формулы:</div>
             <ol class="favorites-list">

@@ -7,7 +7,6 @@ from django.dispatch import receiver
 User = get_user_model()
 
 
-# ============ СТАРЫЕ МОДЕЛИ (которые работали) ============
 
 class Note(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -49,27 +48,21 @@ class TestAttempt(models.Model):
         return round((self.correct_answers / self.total_questions) * 100, 2) if self.total_questions > 0 else 0
 
 
-# ============ НОВЫЕ МОДЕЛИ (для системы уровней и чата) ============
 
 class UserProfile(models.Model):
-    """Расширенный профиль пользователя"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
-    # Система уровней
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
 
-    # Статистика
     total_questions_answered = models.IntegerField(default=0)
     correct_answers = models.IntegerField(default=0)
     total_formulas_studied = models.IntegerField(default=0)
 
-    # Социальное
     friends = models.ManyToManyField('self', symmetrical=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
 
-    # Настройки
     show_statistics = models.BooleanField(default=True)
     notifications_enabled = models.BooleanField(default=True)
 
@@ -95,19 +88,15 @@ class UserProfile(models.Model):
         return f"{self.user.username} (Уровень {self.level})"
 
 
-# ⚠️ ТОЛЬКО ОДИН СИГНАЛ ДЛЯ UserProfile!
 @receiver(post_save, sender=User)
 def manage_user_profile(sender, instance, created, **kwargs):
-    """Создаёт или обновляет профиль пользователя"""
     if created:
         UserProfile.objects.create(user=instance)
     else:
-        # Обновляем существующий профиль
         instance.profile.save()
 
 
 class ChatRoom(models.Model):
-    """Чат-комната"""
     ROOM_TYPES = [
         ('general', 'Общий чат'),
         ('physics', 'Физика'),
@@ -129,7 +118,6 @@ class ChatRoom(models.Model):
 
 
 class ChatMessage(models.Model):
-    """Сообщение в чате"""
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
@@ -143,8 +131,6 @@ class ChatMessage(models.Model):
         return f"{self.sender.username}: {self.message[:30]}..."
 
 
-# ============ КВЕСТЫ (можно добавить позже) ============
-# Пока закомментируем квесты, добавим когда основное заработает
 
 """
 class Quest(models.Model):
@@ -181,12 +167,9 @@ class UserQuest(models.Model):
 """
 
 
-# ============ СИГНАЛ ДЛЯ НАЧАЛЬНЫХ ВОПРОСОВ ============
 
 @receiver(post_migrate)
 def create_initial_questions(sender, **kwargs):
-    """Создаёт начальные вопросы для тестов после миграций"""
-    # Проверяем что это наше приложение
     if hasattr(sender, 'name') and sender.name == 'app':
         try:
             from django.db import transaction
@@ -204,7 +187,6 @@ def create_initial_questions(sender, **kwargs):
                 },
             ]
 
-            # Создаём только если нет вопросов
             if not FormulaQuestion.objects.exists():
                 with transaction.atomic():
                     for q in initial_questions[:2]:  # Только 2 для начала
@@ -216,14 +198,11 @@ def create_initial_questions(sender, **kwargs):
                             }
                         )
         except Exception as e:
-            # Игнорируем ошибки при миграциях
             pass
 
 
-# ============ СИСТЕМА ЗАЯВОК В ДРУЗЬЯ ============
 
 class FriendRequest(models.Model):
-    """Заявка в друзья"""
     from_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -253,15 +232,12 @@ class FriendRequest(models.Model):
         return f"{self.from_user} → {self.to_user} ({self.status})"
 
     def accept(self):
-        """Принять заявку в друзья"""
         if self.status == 'pending':
-            # Создаём профили, если их нет
             if not hasattr(self.from_user, 'profile'):
                 UserProfile.objects.create(user=self.from_user)
             if not hasattr(self.to_user, 'profile'):
                 UserProfile.objects.create(user=self.to_user)
 
-            # Добавляем в друзья
             self.from_user.profile.friends.add(self.to_user.profile)
             self.to_user.profile.friends.add(self.from_user.profile)
             self.status = 'accepted'
@@ -270,7 +246,6 @@ class FriendRequest(models.Model):
         return False
 
     def reject(self):
-        """Отклонить заявку в друзья"""
         if self.status == 'pending':
             self.status = 'rejected'
             self.save()

@@ -21,7 +21,7 @@ from .views import (
     manage_friends,
     send_friend_request,
     handle_friend_request,
-    remove_friend,
+    remove_friend, start_private_chat, send_message,
 )
 
 app_name = "app"
@@ -50,4 +50,7 @@ urlpatterns = [
     path('friends/send/', send_friend_request, name='send_friend_request'),
     path('friends/<int:request_id>/<str:action>/', handle_friend_request, name='handle_friend_request'),
     path('friends/remove/', remove_friend, name='remove_friend'),
+    path('chat/private/<int:user_id>/', start_private_chat, name='start_private_chat'),
+    path('chat/<int:room_id>/send/', send_message, name='send_message'),
+
 ]

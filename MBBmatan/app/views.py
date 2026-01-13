@@ -1,5 +1,7 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.views import LoginView
+from django.views.decorators.http import require_POST
+
 from .forms import RegisterForm, LoginForm
 from django.urls import reverse_lazy
 from .forms import CustomUserCreationForm
@@ -253,22 +255,17 @@ def t_g(request):
 
 @login_required
 def manage_friends(request):
-    """Основная страница друзей (заявки и список)"""
-    # Создаём профиль, если его нет
     if not hasattr(request.user, 'profile'):
         UserProfile.objects.create(user=request.user)
 
-    # Получаем список друзей
     friends_profiles = request.user.profile.friends.all()
     friends = [profile.user for profile in friends_profiles]
 
-    # Получаем заявки в друзья (входящие)
     received_requests = FriendRequest.objects.filter(
         to_user=request.user,
         status='pending'
     )
 
-    # Получаем отправленные заявки (исходящие)
     sent_requests = FriendRequest.objects.filter(
         from_user=request.user,
         status='pending'
@@ -284,7 +281,6 @@ def manage_friends(request):
 
 @login_required
 def send_friend_request(request):
-    """Отправка заявки в друзья"""
     if request.method == 'POST':
         username = request.POST.get('username')
 
@@ -295,13 +291,11 @@ def send_friend_request(request):
         try:
             target_user = User.objects.get(username=username)
 
-            # Проверяем, уже ли друзья
             if hasattr(request.user, 'profile') and hasattr(target_user, 'profile'):
                 if target_user.profile in request.user.profile.friends.all():
                     messages.info(request, f'Вы уже друзья с {username}')
                     return redirect('app:manage_friends')
 
-            # Проверяем, не отправил ли уже заявку
             existing_request = FriendRequest.objects.filter(
                 from_user=request.user,
                 to_user=target_user,
@@ -312,7 +306,6 @@ def send_friend_request(request):
                 messages.info(request, f'Вы уже отправили заявку {username}')
                 return redirect('app:manage_friends')
 
-            # Проверяем, не отправил ли заявку целевой пользователь
             reverse_request = FriendRequest.objects.filter(
                 from_user=target_user,
                 to_user=request.user,
@@ -320,11 +313,9 @@ def send_friend_request(request):
             ).first()
 
             if reverse_request:
-                # Если есть встречная заявка — сразу принимаем её
                 reverse_request.accept()
                 messages.success(request, f'Вы приняли заявку от {username} и стали друзьями!')
             else:
-                # Создаём новую заявку
                 FriendRequest.objects.create(
                     from_user=request.user,
                     to_user=target_user
@@ -339,7 +330,6 @@ def send_friend_request(request):
 
 @login_required
 def handle_friend_request(request, request_id, action):
-    """Обработка заявки в друзья (принять/отклонить)"""
     try:
         friend_request = FriendRequest.objects.get(
             id=request_id,
@@ -360,7 +350,6 @@ def handle_friend_request(request, request_id, action):
                 messages.error(request, 'Не удалось отклонить заявку')
 
         elif action == 'cancel':
-            # Отмена своей отправленной заявки
             if friend_request.from_user == request.user:
                 friend_request.delete()
                 messages.info(request, 'Заявка отменена')
@@ -392,3 +381,54 @@ def remove_friend(request):
             messages.error(request, 'Пользователь не найден')
 
     return redirect('app:manage_friends')
+
+@login_required
+def start_private_chat(request, user_id):
+    other_user = get_object_or_404(User, id=user_id)
+
+    if other_user == request.user:
+        return redirect('app:manage_friends')
+
+    users = sorted([request.user, other_user], key=lambda u: u.id)
+
+    room = ChatRoom.objects.filter(
+        room_type='private',
+        participants=users[0]
+    ).filter(
+        participants=users[1]
+    ).first()
+
+    if not room:
+        room = ChatRoom.objects.create(
+            name=f"Чат: {users[0].username} и {users[1].username}",
+            room_type='private',
+            created_by=request.user
+        )
+        room.participants.add(users[0], users[1])
+
+    return redirect('app:chat_room', room_id=room.id)
+
+@login_required
+@require_POST
+def send_message(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
+
+    if room.room_type == 'private' and request.user not in room.participants.all():
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    text = request.POST.get('message', '').strip()
+
+    if not text:
+        return JsonResponse({'error': 'Пустое сообщение'}, status=400)
+
+    msg = ChatMessage.objects.create(
+        room=room,
+        sender=request.user,
+        message=text
+    )
+
+    return JsonResponse({
+        'username': msg.sender.username,
+        'message': msg.message,
+        'timestamp': msg.timestamp.strftime('%H:%M'),
+    })
