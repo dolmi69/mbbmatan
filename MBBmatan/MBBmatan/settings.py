@@ -65,7 +65,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'app.context_processors.user_profile'
+                'app.context_processors.user_profile',
+                'app.context_processors.mascot_context',
             ],
             'libraries': {
                 'custom_filters': 'app.templatetags.custom_filters',

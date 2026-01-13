@@ -90,6 +90,7 @@
 
         .formulas { background: #3498db; color: white; }
         .theory { background: #e74c3c; color: white; }
+        .chats { background: #2ecc71; color: white; }
         .quiz-button { background: #4CAF50; color: white; }
         .notebook {
             background: #9b59b6;
@@ -152,6 +153,10 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        .chats ul li a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .quiz-button a,
         .notebook a {
             text-decoration: none;
@@ -175,6 +180,10 @@
 
         .notebook a:hover {
             background: #8e44ad;
+        }
+
+        .chats a:hover {
+            background: #27ae60;
         }
 
         footer {
@@ -209,10 +218,23 @@
             border-radius: 5px;
             text-decoration: none;
             transition: background 0.3s;
+            border: none;
+            cursor: pointer;
         }
 
         .logout-btn:hover {
             background: #c0392b;
+        }
+
+        .user-level {
+            display: inline-block;
+            background: #f1c40f;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -223,7 +245,16 @@
             <a href="/home/" class="nav-btn active nav-center">ГЛАВНАЯ</a>
             {% if user.is_authenticated %}
             <div class="user-info">
-                <a href="/profile" class="username">{{ user.username }}</a>
+                <a href="/profile" class="username">
+                    {{ user.username }}
+                    <span class="user-level" title="Пройдено тестов: {{ user.profile.tests_completed }}">
+                        Ур. {{ user.profile.level }}
+                    </span>
+                </a>
+                <form action="{% url 'app:logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
             </div>
             {% else %}
             <button class="login-btn">
@@ -249,6 +280,19 @@
                 <li><a href="{% url 'app:t_f' %}">Физика</a></li>
                 <li><a href="{% url 'app:t_a' %}">Алгебра</a></li>
                 <li><a href="{% url 'app:t_g' %}">Геометрия</a></li>
+            </ul>
+        </section>
+
+        <section class="block chats">
+            <h2>ЧАТЫ</h2>
+            <ul>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'app:subject_chat' 'physics' %}">Физика</a></li>
+                <li><a href="{% url 'app:subject_chat' 'algebra' %}">Алгебра</a></li>
+                <li><a href="{% url 'app:subject_chat' 'geometry' %}">Геометрия</a></li>
+                {% else %}
+                <li><a href="{% url 'app:login' %}">Войдите для доступа к чатам</a></li>
+                {% endif %}
             </ul>
         </section>
 

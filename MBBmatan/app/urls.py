@@ -1,27 +1,12 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-
 from .views import (
-    home,
-    profile,
-    toggle_favorite,
-    formula_quiz,
-    quiz_result,
-    RegisterView,
-    NoteListView,
-    NoteCreateView,
-    NoteUpdateView,
-    NoteDeleteView,
-    chat_home,
-    chat_room,
-    f_f,
-    t_f,
-    t_a,
-    t_g,
-    manage_friends,
-    send_friend_request,
-    handle_friend_request,
-    remove_friend, start_private_chat, send_message,
+    home, profile, toggle_favorite, formula_quiz, quiz_result,
+    RegisterView, NoteListView, NoteCreateView, NoteUpdateView, NoteDeleteView,
+    chat_home, chat_room, subject_chat, send_message,
+    f_f, t_f, t_a, t_g,
+    manage_friends, send_friend_request, handle_friend_request,
+    remove_friend, start_private_chat,
 )
 
 app_name = "app"
@@ -42,6 +27,8 @@ urlpatterns = [
     path('notes/delete/<int:pk>/', NoteDeleteView.as_view(), name='note_delete'),
     path('chat/', chat_home, name='chat_home'),
     path('chat/<int:room_id>/', chat_room, name='chat_room'),
+    path('chat/<str:subject>/', subject_chat, name='subject_chat'),
+    path('chat/<int:room_id>/send/', send_message, name='send_message'),
     path('formulas/physics/', f_f, name='f_f'),
     path('theory/physics/', t_f, name='t_f'),
     path('theory/algebra/', t_a, name='t_a'),
@@ -51,6 +38,4 @@ urlpatterns = [
     path('friends/<int:request_id>/<str:action>/', handle_friend_request, name='handle_friend_request'),
     path('friends/remove/', remove_friend, name='remove_friend'),
     path('chat/private/<int:user_id>/', start_private_chat, name='start_private_chat'),
-    path('chat/<int:room_id>/send/', send_message, name='send_message'),
-
 ]

@@ -1,22 +1,468 @@
-{% extends 'base.html' %}
-{% block title %}Результаты теста{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат теста | MATAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-{% block content %}
-<div class="result-container">
-    <div class="result-card">
-        <h2 class="result-title">Ваш результат:</h2>
-        <div class="score">
-            Правильных ответов: <span class="correct">{{ score }}</span> из {{ total }}
-        </div>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+            position: relative;
+            box-sizing: border-box;
+            width: 100%;
+        }
 
-        <div class="progress-bar">
-            <div class="progress" style="width: {{ progress }}%"></div>
-        </div>
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-        <div class="actions">
-            <a href="{% url 'app:formula_quiz' %}" class="btn">Попробовать снова</a>
-            <a href="{% url 'app:home' %}" class="btn">На главную</a>
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        nav a.nav-btn {
+            text-decoration: none;
+            color: white;
+            background: black;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            overflow: hidden;
+        }
+
+        .login-btn a {
+            display: block;
+            padding: 10px 15px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .login-btn:hover {
+            background: #27ae60;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin-top: 80px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .result-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .result-title {
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .score-excellent {
+            color: #2ecc71;
+        }
+
+        .score-good {
+            color: #3498db;
+        }
+
+        .score-average {
+            color: #f39c12;
+        }
+
+        .score-poor {
+            color: #e74c3c;
+        }
+
+        .progress-section {
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .mascot-result {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        /* Маскот - ИСПРАВЛЕНО центрирование */
+        .mascot-wrapper {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Стили для центрирования содержимого маскота */
+        .mascot-wrapper > * {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .result-message {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+        }
+
+        .user-level-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: #f1c40f;
+            border-radius: 5px;
+        }
+
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 15px;
+            color: white;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .username {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: text-decoration 0.3s;
+        }
+
+        .username:hover {
+            text-decoration: underline;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .user-level {
+            display: inline-block;
+            background: #f1c40f;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'app:home' %}" class="logo">MATAN</a>
+        <nav>
+            <a href="{% url 'app:home' %}" class="nav-btn active nav-center">ГЛАВНАЯ</a>
+            {% if user.is_authenticated %}
+            <div class="user-info">
+                <a href="{% url 'app:profile' %}" class="username">
+                    {{ user.username }}
+                    <span class="user-level" title="Пройдено тестов: {{ user.profile.tests_completed }}">
+                        Ур. {{ user.profile.level }}
+                    </span>
+                </a>
+                <form action="{% url 'app:logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
+            </div>
+            {% else %}
+            <button class="login-btn">
+                <a href="{% url 'app:login' %}" class="login-link">Войти</a>
+            </button>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <div class="result-container">
+            <div class="result-header">
+                <h1 class="result-title">Результаты теста</h1>
+
+                <div class="score-display {% if progress >= 80 %}score-excellent{% elif progress >= 60 %}score-good{% elif progress >= 40 %}score-average{% else %}score-poor{% endif %}">
+                    {{ score }} / {{ total }}
+                </div>
+
+                <div class="progress-section">
+                    <div style="text-align: center; color: #7f8c8d; margin-bottom: 10px;">
+                        Процент правильных ответов: {{ progress }}%
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"
+                             style="width: {{ progress }}%;
+                                    background: {% if progress >= 80 %}#2ecc71{% elif progress >= 60 %}#3498db{% elif progress >= 40 %}#f39c12{% else %}#e74c3c{% endif %};">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mascot-result">
+                <div class="mascot-wrapper">
+                    {% if mascot_state == 'thumbs_up' %}
+                        {% include 'mascot/thumbs_up.html' %}
+                    {% elif mascot_state == 'wrong' %}
+                        {% include 'mascot/wrong.html' %}
+                    {% else %}
+                        {% include 'mascot/neutral.html' %}
+                    {% endif %}
+                </div>
+                <div class="result-message">{{ result_message }}</div>
+            </div>
+
+            {% if user.is_authenticated %}
+            <div class="user-level-info">
+                <h3>Ваш прогресс</h3>
+                <p>Уровень: {{ user.profile.level }}</p>
+                <p>Опыт: {{ user.profile.experience }} / {{ user.profile.level|add:0|stringformat:"d"|add:"00"|slice:":-2" }}</p>
+                <div class="xp-bar">
+                    {% with exp_needed=user.profile.level|add:0|stringformat:"d"|add:"00"|slice:":-2" %}
+                    {% with exp_percent=user.profile.experience|divisibleby:exp_needed|yesno:"100,0" %}
+                    <div class="xp-fill" style="width: {{ exp_percent }}%"></div>
+                    {% endwith %}
+                    {% endwith %}
+                </div>
+                <p>Всего пройдено тестов: {{ user.profile.tests_completed }}</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Всего вопросов</div>
+                    <div class="stat-value">{{ user.profile.total_questions_answered }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Правильные ответы</div>
+                    <div class="stat-value">{{ user.profile.correct_answers }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Процент успеха</div>
+                    <div class="stat-value">{{ user.profile.success_rate|floatformat:1 }}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Всего тестов</div>
+                    <div class="stat-value">{{ user.profile.tests_completed }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="action-buttons">
+                <a href="{% url 'app:formula_quiz' %}" class="btn btn-primary">Пройти еще раз</a>
+                <a href="{% url 'app:home' %}" class="btn btn-success">На главную</a>
+            </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+    </main>
+
+    <footer>
+        <p>Контакты: </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация заполнения прогресс-бара
+            const progressFill = document.querySelector('.progress-fill');
+            progressFill.style.width = '0%';
+            setTimeout(() => {
+                progressFill.style.width = '{{ progress }}%';
+            }, 300);
+
+            // Анимация для XP-бара
+            const xpFill = document.querySelector('.xp-fill');
+            if (xpFill) {
+                xpFill.style.width = '0%';
+                setTimeout(() => {
+                    {% if user.is_authenticated %}
+                    {% with exp_needed=user.profile.level|add:0|stringformat:"d"|add:"00"|slice:":-2" %}
+                    const xpPercent = Math.min(100, ({{ user.profile.experience }} / {{ exp_needed }}) * 100);
+                    {% endwith %}
+                    xpFill.style.width = xpPercent + '%';
+                    {% endif %}
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

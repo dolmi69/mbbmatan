@@ -1,39 +1,491 @@
-{% extends 'base.html' %}
-{% load custom_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест | MATAN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f8f5e6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-{% block content %}
-<div class="quiz-container">
-    <div class="progress-bar">
-        <div class="progress" style="width: {{ current_number|div:total_questions|multiply:100 }}%"></div>
-    </div>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #777;
+            padding: 15px 20px;
+            color: white;
+            position: relative;
+            box-sizing: border-box;
+            width: 100%;
+        }
 
-    <h2>Вопрос {{ current_number }} из {{ total_questions }}</h2>
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-    <form method="post">
-        {% csrf_token %}
-        <div class="question-card">
-            <h3>{{ question.formula }}</h3>
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
 
-            <div class="options">
-                {% for option in question.options %}
-                <label class="option">
-                    <input type="radio"
-                           name="answer"
-                           value="{{ option }}"
-                           required>
-                    {{ option }}
-                </label>
-                {% endfor %}
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        nav a.nav-btn {
+            text-decoration: none;
+            color: white;
+            background: black;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            overflow: hidden;
+        }
+
+        .login-btn a {
+            display: block;
+            padding: 10px 15px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .login-btn:hover {
+            background: #27ae60;
+        }
+
+        main {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            padding: 20px;
+            margin-top: 80px;
+            gap: 20px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        /* Левая часть с вопросом */
+        .question-block {
+            flex: 3;
+            min-width: 300px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: #3498db;
+            color: white;
+        }
+
+        /* Правая часть с маскотом */
+        .mascot-block {
+            flex: 2;
+            min-width: 250px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: #2ecc71;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Прогресс бар */
+        .progress-block {
+            flex: 1 100%;
+            min-width: 300px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: #f8f5e6; /* Убран желтый фон */
+            color: #333; /* Изменен цвет текста на темный */
+            text-align: center;
+            border: 1px solid #ddd; /* Добавлена тонкая рамка */
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .question-block h2::after,
+        .mascot-block h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 15px auto 20px;
+        }
+
+        .progress-block h2 {
+            color: #333;
+        }
+
+        .progress-block h2::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 2px;
+            background: #ccc;
+            margin: 15px auto 20px;
+        }
+
+        .question-text {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-label {
+            display: block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .option-content {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .option-input:checked + .option-content {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+
+        .option-content:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .quiz-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #3498db;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Маскот - ИСПРАВЛЕНО центрирование */
+        .mascot-wrapper {
+            width: 200px;
+            height: 200px;
+            background: transparent;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            padding: 10px;
+            position: relative;
+        }
+
+        /* Стили для центрирования содержимого маскота */
+        .mascot-wrapper > * {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .mascot-message {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            min-width: 200px;
+        }
+
+        /* Прогресс бар */
+        .progress-info {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0; /* Светло-серый фон */
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2ecc71; /* Зеленый цвет вместо белого */
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        footer {
+            background: #777;
+            text-align: center;
+            padding: 15px;
+            color: white;
+            margin-top: auto;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .username {
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: text-decoration 0.3s;
+        }
+
+        .username:hover {
+            text-decoration: underline;
+        }
+
+        /* УДАЛЕНО: .logout-btn - кнопка выхода полностью удалена */
+
+        .user-level {
+            display: inline-block;
+            background: #f1c40f;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        /* Для неавторизованных пользователей */
+        .auth-warning {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .auth-warning a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'app:home' %}" class="logo">MATAN</a>
+        <nav>
+            <a href="{% url 'app:home' %}" class="nav-btn active nav-center">ГЛАВНАЯ</a>
+            {% if user.is_authenticated %}
+            <div class="user-info">
+                <a href="{% url 'app:profile' %}" class="username">
+                    {{ user.username }}
+                    <span class="user-level">Ур. {{ user.profile.level }}</span>
+                </a>
+                <!-- УДАЛЕНО: форма выхода полностью удалена -->
+            </div>
+            {% else %}
+            <button class="login-btn">
+                <a href="{% url 'app:login' %}" class="login-link">Войти</a>
+            </button>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <!-- Прогресс бар сверху -->
+        <div class="progress-block">
+            <h2>Прогресс теста</h2>
+            <div class="progress-info">
+                Вопрос {{ current_number }} из {{ total_questions }}
+            </div>
+            <div class="progress-container">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
         </div>
 
-        <button type="submit" class="btn">
-            {% if current_number == total_questions %}
-                Завершить тест
-            {% else %}
-                Следующий вопрос →
+        <!-- Левая часть - вопрос и варианты ответов -->
+        <div class="question-block">
+            <h2>Вопрос</h2>
+            <div class="question-text">{{ question.formula }}</div>
+
+            <form method="post" id="quizForm">
+                {% csrf_token %}
+
+                <div class="options-grid">
+                    {% for option in question.options %}
+                    <label class="option-label">
+                        <input type="radio"
+                               class="option-input"
+                               name="answer"
+                               value="{{ option }}"
+                               {% if not user.is_authenticated %}disabled{% endif %}
+                               required>
+                        <div class="option-content">{{ option }}</div>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="quiz-actions">
+                    <a href="{% url 'app:home' %}" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-primary" {% if not user.is_authenticated %}disabled{% endif %}>
+                        {% if current_number == total_questions %}
+                            Завершить тест
+                        {% else %}
+                            Следующий вопрос →
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mascot-block">
+            <h2>Ваш помощник</h2>
+            <div class="mascot-wrapper">
+                {% if mascot_state == 'thumbs_up' %}
+                    {% include 'mascot/thumbs_up.html' %}
+                {% elif mascot_state == 'wrong' %}
+                    {% include 'mascot/wrong.html' %}
+                {% else %}
+                    {% include 'mascot/neutral.html' %}
+                {% endif %}
+            </div>
+            <div class="mascot-message">{{ mascot_message }}</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Контакты:</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('quizForm');
+            const options = document.querySelectorAll('.option-input');
+            const progressFill = document.getElementById('progressFill');
+
+            // Устанавливаем прогресс-бар
+            const currentNumber = {{ current_number }};
+            const totalQuestions = {{ total_questions }};
+            const progressPercent = (currentNumber / totalQuestions) * 100;
+            progressFill.style.width = progressPercent + '%';
+
+            // Сохраняем выбранный ответ
+            options.forEach(option => {
+                option.addEventListener('change', function() {
+                    // Снимаем выделение со всех вариантов
+                    document.querySelectorAll('.option-content').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+
+                    // Добавляем выделение выбранному
+                    this.parentElement.querySelector('.option-content').classList.add('selected');
+                });
+            });
+
+            // Если пользователь не авторизован, показываем предупреждение
+            {% if not user.is_authenticated %}
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Пожалуйста, войдите в систему для прохождения теста');
+                window.location.href = "{% url 'app:login' %}";
+            });
             {% endif %}
-        </button>
-    </form>
-</div>
-{% endblock %}
+        });
+    </script>
+</body>
+</html>

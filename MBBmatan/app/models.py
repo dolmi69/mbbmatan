@@ -7,7 +7,6 @@ from django.dispatch import receiver
 User = get_user_model()
 
 
-
 class Note(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True)
@@ -48,7 +47,6 @@ class TestAttempt(models.Model):
         return round((self.correct_answers / self.total_questions) * 100, 2) if self.total_questions > 0 else 0
 
 
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
@@ -59,6 +57,7 @@ class UserProfile(models.Model):
     total_questions_answered = models.IntegerField(default=0)
     correct_answers = models.IntegerField(default=0)
     total_formulas_studied = models.IntegerField(default=0)
+    tests_completed = models.IntegerField(default=0)
 
     friends = models.ManyToManyField('self', symmetrical=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
@@ -78,6 +77,18 @@ class UserProfile(models.Model):
             self.experience -= exp_needed
             self.points += 50
             exp_needed = self.level * 100
+
+    def add_test_completed(self, correct_answers, total_questions):
+        self.total_questions_answered += total_questions
+        self.correct_answers += correct_answers
+        self.tests_completed += 1
+
+        experience_gained = correct_answers * 10
+        if correct_answers == total_questions:
+            experience_gained += 50
+
+        self.add_experience(experience_gained)
+        self.save()
 
     def success_rate(self):
         if self.total_questions_answered > 0:
@@ -116,6 +127,36 @@ class ChatRoom(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
 
+    @classmethod
+    def get_or_create_general_chats(cls):
+        general_chats = [
+            {
+                'name': 'Общий чат по физике',
+                'room_type': 'physics',
+                'description': 'Обсуждение формул и законов физики'
+            },
+            {
+                'name': 'Общий чат по алгебре',
+                'room_type': 'algebra',
+                'description': 'Обсуждение алгебраических выражений и уравнений'
+            },
+            {
+                'name': 'Общий чат по геометрии',
+                'room_type': 'geometry',
+                'description': 'Обсуждение геометрических фигур и теорем'
+            },
+        ]
+
+        for chat_data in general_chats:
+            cls.objects.get_or_create(
+                name=chat_data['name'],
+                room_type=chat_data['room_type'],
+                defaults={
+                    'description': chat_data['description'],
+                    'is_active': True
+                }
+            )
+
 
 class ChatMessage(models.Model):
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
@@ -130,46 +171,8 @@ class ChatMessage(models.Model):
     def __str__(self):
         return f"{self.sender.username}: {self.message[:30]}..."
 
-
-
-"""
-class Quest(models.Model):
-    QUEST_TYPES = [
-        ('daily', 'Ежедневный'),
-        ('weekly', 'Недельный'),
-        ('seasonal', 'Сезонный'),
-        ('achievement', 'Достижение'),
-    ]
-
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    quest_type = models.CharField(max_length=20, choices=QUEST_TYPES, default='daily')
-    reward_points = models.IntegerField(default=10)
-    reward_experience = models.IntegerField(default=50)
-
-    required_actions = models.JSONField(default=dict)
-    is_active = models.BooleanField(default=True)
-    start_date = models.DateTimeField(auto_now_add=True)
-    end_date = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return self.title
-
-class UserQuest(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
-    progress = models.JSONField(default=dict)
-    is_completed = models.BooleanField(default=False)
-    completed_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ['user', 'quest']
-"""
-
-
-
 @receiver(post_migrate)
-def create_initial_questions(sender, **kwargs):
+def create_initial_data(sender, **kwargs):
     if hasattr(sender, 'name') and sender.name == 'app':
         try:
             from django.db import transaction
@@ -185,21 +188,47 @@ def create_initial_questions(sender, **kwargs):
                     "correct_answer": "Ньютон",
                     "options": ["Паскаль", "Джоуль", "Ньютон", "Ватт"]
                 },
+                {
+                    "formula": "Формула для вычисления площади круга?",
+                    "correct_answer": "S = π·r²",
+                    "options": ["S = a·b", "S = π·r²", "S = ½·a·h", "S = a²"]
+                },
+                {
+                    "formula": "Формула теоремы Пифагора?",
+                    "correct_answer": "a² + b² = c²",
+                    "options": ["E = mc²", "a² + b² = c²", "V = S·h", "F = G·(m₁·m₂)/r²"]
+                },
+                {
+                    "formula": "Формула для вычисления скорости?",
+                    "correct_answer": "v = s/t",
+                    "options": ["v = s·t", "v = s/t", "v = a·t", "v = √(2gh)"]
+                },
+                {
+                    "formula": "Формула для вычисления работы?",
+                    "correct_answer": "A = F·s",
+                    "options": ["A = F·s", "A = m·g·h", "A = P·t", "A = ½·m·v²"]
+                },
+                {
+                    "formula": "Формула для вычисления мощности?",
+                    "correct_answer": "P = A/t",
+                    "options": ["P = F·v", "P = A/t", "P = U·I", "P = m·g"]
+                },
             ]
 
-            if not FormulaQuestion.objects.exists():
-                with transaction.atomic():
-                    for q in initial_questions[:2]:  # Только 2 для начала
-                        FormulaQuestion.objects.get_or_create(
-                            formula=q['formula'],
-                            defaults={
-                                'correct_answer': q['correct_answer'],
-                                'options': q['options']
-                            }
-                        )
-        except Exception as e:
-            pass
+            with transaction.atomic():
+                for q in initial_questions:
+                    FormulaQuestion.objects.get_or_create(
+                        formula=q['formula'],
+                        defaults={
+                            'correct_answer': q['correct_answer'],
+                            'options': q['options']
+                        }
+                    )
 
+            ChatRoom.get_or_create_general_chats()
+
+        except Exception as e:
+            print(f"Error creating initial data: {e}")
 
 
 class FriendRequest(models.Model):

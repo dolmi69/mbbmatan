@@ -1,22 +1,16 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
-
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, CustomUserCreationForm
 from django.urls import reverse_lazy
-from .forms import CustomUserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .models import Note, ChatMessage, ChatRoom
+from .models import Note, ChatMessage, ChatRoom, FavoriteFormula, FormulaQuestion, TestAttempt, UserProfile, \
+    FriendRequest, User
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import FavoriteFormula
 from django.http import JsonResponse
-from .models import FormulaQuestion, TestAttempt
 import random
-from .models import UserProfile
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.models import User
-from .models import FriendRequest
 
 
 class RegisterView(CreateView):
@@ -24,10 +18,12 @@ class RegisterView(CreateView):
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('app:login')
 
+
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('login')
+
 
 def home(request):
     context = {
@@ -41,20 +37,20 @@ class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
 
 
+@login_required
 def profile(request):
-    if request.user.is_authenticated:
-        attempts = TestAttempt.objects.filter(user=request.user).order_by('-date')[:5] #отвечает за количество вопросов в тесте
-        favorites = FavoriteFormula.objects.filter(user=request.user)
+    attempts = TestAttempt.objects.filter(user=request.user).order_by('-date')[:5]
+    favorites = FavoriteFormula.objects.filter(user=request.user)
 
-        context = {
-            'user': request.user,
-            'attempts': attempts,
-            'total_attempts': attempts.count(),
-            'total_correct': sum([a.correct_answers for a in attempts]),
-            'favorites': favorites,
-        }
-        return render(request, 'profile.html', context)
-    return redirect('login')
+    context = {
+        'user': request.user,
+        'attempts': attempts,
+        'total_attempts': attempts.count(),
+        'total_correct': sum([a.correct_answers for a in attempts]),
+        'favorites': favorites,
+    }
+    return render(request, 'profile.html', context)
+
 
 class NoteListView(LoginRequiredMixin, ListView):
     model = Note
@@ -63,6 +59,7 @@ class NoteListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Note.objects.filter(user=self.request.user)
+
 
 class NoteCreateView(LoginRequiredMixin, CreateView):
     model = Note
@@ -74,60 +71,49 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+
 class NoteUpdateView(LoginRequiredMixin, UpdateView):
     model = Note
     fields = ["title", "content"]
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
 
+
 class NoteDeleteView(LoginRequiredMixin, DeleteView):
     model = Note
     success_url = reverse_lazy("app:note_list")
 
 
-
-
+@login_required
+@require_POST
 def toggle_favorite(request):
-    if request.method == 'POST' and request.user.is_authenticated:
-        formula_text = request.POST.get('formula_text')
-        favorite, created = FavoriteFormula.objects.get_or_create(
-            user=request.user,
-            formula_text=formula_text
-        )
-        if not created:
-            favorite.delete()
-            return JsonResponse({'status': 'removed'})
-        return JsonResponse({'status': 'added'})
-    return JsonResponse({'status': 'error'}, status=400)
-
-def physics_formulas(request):
-    formulas = [
-        {'text': 'E = mc<sup>2</sup>'},
-        {'text': 'F = ma'},
-        {'text': 'V = IR'}
-    ]
-
-    if request.user.is_authenticated:
-        user_favorites = FavoriteFormula.objects.filter(
-            user=request.user
-        ).values_list('formula_text', flat=True)
-
-        for formula in formulas:
-            formula['is_favorite'] = formula['text'] in user_favorites
-
-    return render(request, 'f-f.html', {'formulas': formulas})
+    formula_text = request.POST.get('formula_text')
+    favorite, created = FavoriteFormula.objects.get_or_create(
+        user=request.user,
+        formula_text=formula_text
+    )
+    if not created:
+        favorite.delete()
+        return JsonResponse({'status': 'removed'})
+    return JsonResponse({'status': 'added'})
 
 
 def formula_quiz(request):
     if 'quiz_questions' not in request.session:
         all_questions = list(FormulaQuestion.objects.all())
 
-        if len(all_questions) < 5:
-            return render(request, 'error.html', {'message': 'Недостаточно вопросов для теста'})
+        if len(all_questions) == 0:
+            messages.error(request, 'Нет доступных вопросов для теста.')
+            return redirect('app:home')
 
-        request.session['quiz_questions'] = [q.id for q in random.sample(all_questions, 5)]
+        num_questions = min(len(all_questions), 7)
+
+        selected_questions = random.sample(all_questions, num_questions)
+
+        request.session['quiz_questions'] = [q.id for q in selected_questions]
         request.session['current_question'] = 0
         request.session['score'] = 0
+        request.session['last_answer_correct'] = None
 
     question_ids = request.session['quiz_questions']
     current_idx = request.session['current_question']
@@ -142,7 +128,10 @@ def formula_quiz(request):
 
     if request.method == 'POST':
         user_answer = request.POST.get('answer')
-        if user_answer == question.correct_answer:
+        is_correct = user_answer == question.correct_answer
+        request.session['last_answer_correct'] = is_correct
+
+        if is_correct:
             request.session['score'] += 1
 
         request.session['current_question'] += 1
@@ -153,12 +142,24 @@ def formula_quiz(request):
 
         return redirect('app:formula_quiz')
 
+    mascot_state = 'neutral'
+    mascot_message = "Выберите правильный ответ!"
+
+    if 'last_answer_correct' in request.session:
+        if request.session['last_answer_correct'] is True:
+            mascot_state = 'thumbs_up'
+            mascot_message = "Правильно! Отличная работа!"
+        elif request.session['last_answer_correct'] is False:
+            mascot_state = 'wrong'
+            mascot_message = "Неверно. Попробуйте еще раз!"
+
     return render(request, 'formuls/quiz.html', {
         'question': question,
         'current_number': current_idx + 1,
-        'total_questions': len(question_ids)
+        'total_questions': len(question_ids),
+        'mascot_state': mascot_state,
+        'mascot_message': mascot_message,
     })
-
 
 def quiz_result(request):
     if 'quiz_questions' not in request.session:
@@ -166,6 +167,7 @@ def quiz_result(request):
 
     score = request.session.get('score', 0)
     total = len(request.session['quiz_questions'])
+    percentage = (score / total * 100) if total > 0 else 0
 
     if request.user.is_authenticated:
         TestAttempt.objects.create(
@@ -174,54 +176,77 @@ def quiz_result(request):
             total_questions=total
         )
 
-    del request.session['quiz_questions']
-    del request.session['current_question']
-    del request.session['score']
+        profile = request.user.profile
+        profile.add_test_completed(score, total)
+
+    if percentage >= 80:
+        mascot_state = 'thumbs_up'
+        result_message = 'Отличный результат! 🎉'
+    elif percentage >= 60:
+        mascot_state = 'neutral'
+        result_message = 'Хорошая работа! 👍'
+    else:
+        mascot_state = 'wrong'
+        result_message = 'Попробуйте еще раз! 💪'
+
+    keys_to_delete = ['quiz_questions', 'current_question', 'score', 'last_answer_correct']
+    for key in keys_to_delete:
+        if key in request.session:
+            del request.session[key]
 
     return render(request, 'formuls/quiz_result.html', {
         'score': score,
         'total': total,
-        'progress': int((score / total) * 100) if total > 0 else 0
+        'progress': int(percentage),
+        'mascot_state': mascot_state,
+        'result_message': result_message,
     })
-
-
-'''
-@login_required
-def enhanced_profile(request):
-    profile = request.user.profile
-    active_quests = UserQuest.objects.filter(
-        user=request.user,
-        is_completed=False
-    ).select_related('quest')
-
-    exp_needed = profile.level * 100
-    exp_progress = min((profile.experience / exp_needed) * 100, 100)
-
-    context = {
-        'profile': profile,
-        'active_quests': active_quests,
-        'exp_needed': exp_needed,
-        'exp_progress': exp_progress,
-        'success_rate': profile.success_rate(),
-    }
-    return render(request, 'profile_enhanced.html', context)'''
 
 
 @login_required
 def chat_home(request):
-    rooms = ChatRoom.objects.filter(
-        participants=request.user,
+    general_chats = ChatRoom.objects.filter(
+        room_type__in=['physics', 'algebra', 'geometry'],
         is_active=True
     )
-    general_rooms = ChatRoom.objects.filter(
-        room_type__in=['general', 'physics', 'algebra', 'geometry'],
+
+    private_rooms = ChatRoom.objects.filter(
+        room_type='private',
+        participants=request.user,
         is_active=True
     )
 
     return render(request, 'chat/home.html', {
-        'user_rooms': rooms,
-        'general_rooms': general_rooms,
+        'general_chats': general_chats,
+        'private_rooms': private_rooms,
     })
+
+
+@login_required
+def subject_chat(request, subject):
+    subject_map = {
+        'physics': 'Физика',
+        'algebra': 'Алгебра',
+        'geometry': 'Геометрия'
+    }
+
+    if subject not in subject_map:
+        return redirect('app:chat_home')
+
+    room_name = f"Чат для обсуждения предмета по предмету {subject_map[subject].lower()}"
+    room, created = ChatRoom.objects.get_or_create(
+        name=room_name,
+        room_type=subject,
+        defaults={
+            'description': f'Обсуждение вопросов по {subject_map[subject].lower()}',
+            'is_active': True
+        }
+    )
+
+    if request.user not in room.participants.all():
+        room.participants.add(request.user)
+
+    return redirect('app:chat_room', room_id=room.id)
 
 
 @login_required
@@ -229,9 +254,14 @@ def chat_room(request, room_id):
     room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
 
     if room.room_type == 'private' and request.user not in room.participants.all():
+        messages.error(request, 'У вас нет доступа к этому чату')
         return redirect('app:chat_home')
 
-    messages = ChatMessage.objects.filter(room=room)[:50]
+    if room.room_type in ['physics', 'algebra', 'geometry']:
+        if request.user not in room.participants.all():
+            room.participants.add(request.user)
+
+    messages = ChatMessage.objects.filter(room=room).order_by('timestamp')[:100]
 
     return render(request, 'chat/room.html', {
         'room': room,
@@ -239,15 +269,44 @@ def chat_room(request, room_id):
     })
 
 
+@login_required
+@require_POST
+def send_message(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
+
+    if request.user not in room.participants.all():
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    message_text = request.POST.get('message', '').strip()
+    if not message_text:
+        return JsonResponse({'error': 'Пустое сообщение'}, status=400)
+
+    message = ChatMessage.objects.create(
+        room=room,
+        sender=request.user,
+        message=message_text
+    )
+
+    return JsonResponse({
+        'success': True,
+        'message_id': message.id,
+        'sender': message.sender.username,
+        'message': message.message,
+        'timestamp': message.timestamp.strftime('%H:%M'),
+    })
+
 
 def f_f(request):
     return render(request, 'formuls/f-f.html')
 
+
 def t_f(request):
     return render(request, 'formuls/physics.html')
 
+
 def t_a(request):
     return render(request, 'formuls/algebra.html')
+
 
 def t_g(request):
     return render(request, 'formuls/geometry.html')
@@ -280,50 +339,50 @@ def manage_friends(request):
 
 
 @login_required
+@require_POST
 def send_friend_request(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
+    username = request.POST.get('username')
 
-        if username == request.user.username:
-            messages.error(request, 'Нельзя отправить заявку самому себе')
-            return redirect('app:manage_friends')
+    if username == request.user.username:
+        messages.error(request, 'Нельзя отправить заявку самому себе')
+        return redirect('app:manage_friends')
 
-        try:
-            target_user = User.objects.get(username=username)
+    try:
+        target_user = User.objects.get(username=username)
 
-            if hasattr(request.user, 'profile') and hasattr(target_user, 'profile'):
-                if target_user.profile in request.user.profile.friends.all():
-                    messages.info(request, f'Вы уже друзья с {username}')
-                    return redirect('app:manage_friends')
-
-            existing_request = FriendRequest.objects.filter(
-                from_user=request.user,
-                to_user=target_user,
-                status='pending'
-            ).exists()
-
-            if existing_request:
-                messages.info(request, f'Вы уже отправили заявку {username}')
+        if hasattr(request.user, 'profile') and hasattr(target_user, 'profile'):
+            if target_user.profile in request.user.profile.friends.all():
+                messages.info(request, f'Вы уже друзья с {username}')
                 return redirect('app:manage_friends')
 
-            reverse_request = FriendRequest.objects.filter(
-                from_user=target_user,
-                to_user=request.user,
-                status='pending'
-            ).first()
+        existing_request = FriendRequest.objects.filter(
+            from_user=request.user,
+            to_user=target_user,
+            status='pending'
+        ).exists()
 
-            if reverse_request:
-                reverse_request.accept()
-                messages.success(request, f'Вы приняли заявку от {username} и стали друзьями!')
-            else:
-                FriendRequest.objects.create(
-                    from_user=request.user,
-                    to_user=target_user
-                )
-                messages.success(request, f'Заявка отправлена пользователю {username}')
+        if existing_request:
+            messages.info(request, f'Вы уже отправили заявку {username}')
+            return redirect('app:manage_friends')
 
-        except User.DoesNotExist:
-            messages.error(request, 'Пользователь не найден')
+        reverse_request = FriendRequest.objects.filter(
+            from_user=target_user,
+            to_user=request.user,
+            status='pending'
+        ).first()
+
+        if reverse_request:
+            reverse_request.accept()
+            messages.success(request, f'Вы приняли заявку от {username} и стали друзьями!')
+        else:
+            FriendRequest.objects.create(
+                from_user=request.user,
+                to_user=target_user
+            )
+            messages.success(request, f'Заявка отправлена пользователю {username}')
+
+    except User.DoesNotExist:
+        messages.error(request, 'Пользователь не найден')
 
     return redirect('app:manage_friends')
 
@@ -361,26 +420,26 @@ def handle_friend_request(request, request_id, action):
 
 
 @login_required
+@require_POST
 def remove_friend(request):
-    """Удаление из друзей"""
-    if request.method == 'POST':
-        username = request.POST.get('username')
+    username = request.POST.get('username')
 
-        try:
-            target_user = User.objects.get(username=username)
+    try:
+        target_user = User.objects.get(username=username)
 
-            if hasattr(request.user, 'profile') and hasattr(target_user, 'profile'):
-                if target_user.profile in request.user.profile.friends.all():
-                    request.user.profile.friends.remove(target_user.profile)
-                    target_user.profile.friends.remove(request.user.profile)
-                    messages.success(request, f'Вы удалили {username} из друзей')
-                else:
-                    messages.error(request, 'Этот пользователь не в вашем списке друзей')
+        if hasattr(request.user, 'profile') and hasattr(target_user, 'profile'):
+            if target_user.profile in request.user.profile.friends.all():
+                request.user.profile.friends.remove(target_user.profile)
+                target_user.profile.friends.remove(request.user.profile)
+                messages.success(request, f'Вы удалили {username} из друзей')
+            else:
+                messages.error(request, 'Этот пользователь не в вашем списке друзей')
 
-        except User.DoesNotExist:
-            messages.error(request, 'Пользователь не найден')
+    except User.DoesNotExist:
+        messages.error(request, 'Пользователь не найден')
 
     return redirect('app:manage_friends')
+
 
 @login_required
 def start_private_chat(request, user_id):
@@ -407,28 +466,3 @@ def start_private_chat(request, user_id):
         room.participants.add(users[0], users[1])
 
     return redirect('app:chat_room', room_id=room.id)
-
-@login_required
-@require_POST
-def send_message(request, room_id):
-    room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
-
-    if room.room_type == 'private' and request.user not in room.participants.all():
-        return JsonResponse({'error': 'Нет доступа'}, status=403)
-
-    text = request.POST.get('message', '').strip()
-
-    if not text:
-        return JsonResponse({'error': 'Пустое сообщение'}, status=400)
-
-    msg = ChatMessage.objects.create(
-        room=room,
-        sender=request.user,
-        message=text
-    )
-
-    return JsonResponse({
-        'username': msg.sender.username,
-        'message': msg.message,
-        'timestamp': msg.timestamp.strftime('%H:%M'),
-    })
