@@ -7,7 +7,7 @@ from .views import (
     f_f, t_f, t_a, t_g,
     manage_friends, send_friend_request, handle_friend_request,
     remove_friend, start_private_chat, user_profile_view, create_group_chat, notification_list, get_hint,
-    mark_notification_read,
+    mark_notification_read, NoteDetailView,
 )
 
 app_name = "app"
@@ -44,4 +44,5 @@ urlpatterns = [
     path('notifications/', notification_list, name='notifications'),
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     path('quiz/hint/', get_hint, name='get_hint'),
+    path('notes/<int:pk>/', NoteDetailView.as_view(), name='note_detail'),
 ]

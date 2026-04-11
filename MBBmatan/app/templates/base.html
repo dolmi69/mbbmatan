@@ -22,14 +22,16 @@
             min-height: 100vh;
         }
 
+        /* ----- ШАПКА (увеличена, ширина 100%) ----- */
         .navbar {
             background: #5a6e7c;
             color: white;
-            padding: 0 20px;
+            padding: 5px 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
+            width: 100%;
         }
 
         .nav-container {
@@ -38,11 +40,11 @@
             justify-content: space-between;
             max-width: 1400px;
             margin: 0 auto;
-            height: 70px;
+            height: 75px;  /* было 70px */
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             color: white;
             text-decoration: none;
@@ -70,10 +72,6 @@
             align-items: center;
             gap: 6px;
             font-weight: 500;
-        }
-
-        .nav-link i {
-            font-size: 1.1em;
         }
 
         .nav-link:hover {
@@ -106,7 +104,6 @@
             text-decoration: none;
             display: block;
             border-radius: 8px;
-            transition: background 0.2s;
         }
 
         .dropdown-content a:hover {
@@ -178,7 +175,6 @@
             border-radius: 8px;
             text-decoration: none;
             font-weight: 500;
-            transition: 0.2s;
         }
 
         .btn-login {
@@ -196,19 +192,20 @@
         .btn-login:hover {
             background: rgba(255,255,255,0.2);
         }
-
         .btn-signup:hover {
             background: #27ae60;
         }
 
+        /* ----- ОСНОВНОЙ КОНТЕНТ ----- */
         .main-content {
             flex: 1;
             max-width: 1400px;
-            margin: 30px auto;
+            margin: 20px auto;
             padding: 0 20px;
             width: 100%;
         }
 
+        /* ----- СООБЩЕНИЯ ----- */
         .messages-container {
             margin-bottom: 25px;
         }
@@ -238,17 +235,13 @@
             border-left: 5px solid #17a2b8;
         }
 
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border-left: 5px solid #ffc107;
-        }
-
+        /* ----- ФУТЕР (уменьшен, ширина 100%) ----- */
         .footer {
             background: #5a6e7c;
             color: #ecf0f1;
-            padding: 30px 20px;
+            padding: 15px 20px;
             margin-top: auto;
+            width: 100%;
         }
 
         .footer-container {
@@ -257,26 +250,27 @@
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 30px;
+            gap: 20px;
         }
 
         .footer-section h3 {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #f1c40f;
+            font-size: 1.1rem;
         }
 
-        .footer-section a {
+        .footer-section p, .footer-section a {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
             color: #ecf0f1;
             text-decoration: none;
-            display: block;
-            margin-bottom: 8px;
-            transition: color 0.2s;
         }
 
         .footer-section a:hover {
-            color: white;
+            text-decoration: underline;
         }
 
+        /* ----- АДАПТИВНОСТЬ ----- */
         @media (max-width: 768px) {
             .nav-container {
                 flex-wrap: wrap;
@@ -291,160 +285,118 @@
                 flex-wrap: wrap;
             }
         }
-
-        .block {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="{% url 'app:home' %}" class="logo">
-            <i class="fas fa-calculator"></i> MATAN
-        </a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'app:home' %}" class="logo">
+                <i class="fas fa-calculator"></i> MATAN
+            </a>
 
-        <div class="nav-menu">
-            <a href="{% url 'app:home' %}" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <div class="nav-menu">
+                <a href="{% url 'app:home' %}" class="nav-link"><i class="fas fa-home"></i> Главная</a>
 
-            <div class="dropdown">
-                <a href="#" class="nav-link"><i class="fas fa-book"></i> Предметы</a>
-                <div class="dropdown-content">
-                    <a href="{% url 'app:f_f' %}"><i class="fas fa-flask"></i> Физика</a>
-                    <a href="{% url 'app:t_a' %}"><i class="fas fa-square-root-alt"></i> Алгебра</a>
-                    <a href="{% url 'app:t_g' %}"><i class="fas fa-shapes"></i> Геометрия</a>
+                <div class="dropdown">
+                    <a href="#" class="nav-link"><i class="fas fa-book"></i> Предметы</a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'app:f_f' %}"><i class="fas fa-flask"></i> Физика</a>
+                        <a href="{% url 'app:t_a' %}"><i class="fas fa-square-root-alt"></i> Алгебра</a>
+                        <a href="{% url 'app:t_g' %}"><i class="fas fa-shapes"></i> Геометрия</a>
+                    </div>
                 </div>
-            </div>
 
-            <a href="{% url 'app:formula_quiz' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
-            <a href="{% url 'app:note_list' %}" class="nav-link"><i class="fas fa-sticky-note"></i> Заметки</a>
+                <a href="{% url 'app:formula_quiz' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
+                <a href="{% url 'app:note_list' %}" class="nav-link"><i class="fas fa-sticky-note"></i> Заметки</a>
 
-            {% if user.is_authenticated %}
-            <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
-            <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
-            {% endif %}
-        </div>
-        {% if user.is_authenticated %}
-        <div class="user-profile">
-            <div class="user-info">
-                <a href="{% url 'app:profile' %}" class="username">{{ user.username }}</a>
-                {% if user.profile %}
-                <span class="level-badge">Ур. {{ user.profile.level }}</span>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
+                    <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
                 {% endif %}
             </div>
-            <div class="user-actions">
-                <a href="{% url 'app:profile' %}" class="btn-profile"><i class="fas fa-user"></i></a>
-                <a href="{% url 'app:notifications' %}" class="btn-profile" style="position:relative;">
-                    <i class="fas fa-bell"></i>
-                    {% if unread_notifications %}
-                    <span style="position:absolute; top:-5px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px;">
-                                {{ unread_notifications }}
-                            </span>
-                    {% endif %}
-                </a>
-                <form action="{% url 'app:logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
-                </form>
+
+            <div class="user-section">
+                {% if user.is_authenticated %}
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <a href="{% url 'app:profile' %}" class="username">{{ user.username }}</a>
+                            {% if user.profile %}
+                                <span class="level-badge">Ур. {{ user.profile.level }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'app:profile' %}" class="btn-profile"><i class="fas fa-user"></i></a>
+                            <!-- Иконка уведомлений -->
+                            <a href="{% url 'app:notifications' %}" class="btn-profile" style="position:relative;">
+                                <i class="fas fa-bell"></i>
+                                {% if unread_notifications %}
+                                    <span style="position:absolute; top:-5px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px;">
+                                        {{ unread_notifications }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                            <form action="{% url 'app:logout' %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="auth-buttons">
+                        <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</a>
+                        <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> Регистрация</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% else %}
-        <div class="auth-buttons">
-            <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</a>
-            <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> Регистрация</a>
-        </div>
+    </nav>
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
-    </div>
-</nav>
 
-<main class="main-content">
-    {% if messages %}
-    <div class="messages-container">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
 
-    {% block content %}
-    {% endblock %}
-</main>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>MATAN</h3>
+                <p>Платформа для изучения точных наук</p>
+                <p>© {% now "Y" %} Все права защищены</p>
+            </div>
+            <div class="footer-section">
+                <h3>Навигация</h3>
+                <a href="{% url 'app:home' %}">Главная</a>
+                <a href="{% url 'app:f_f' %}">Формулы физики</a>
+                <a href="{% url 'app:t_a' %}">Теория алгебры</a>
+                <a href="{% url 'app:t_g' %}">Геометрия</a>
+                <a href="{% url 'app:formula_quiz' %}">Тесты</a>
+            </div>
+            <div class="footer-section">
+                <h3>Сообщество</h3>
+                <a href="{% url 'app:chat_home' %}">Чаты</a>
+                <a href="{% url 'app:manage_friends' %}">Друзья</a>
+                <a href="{% url 'app:profile' %}">Профиль</a>
+            </div>
+            <div class="footer-section">
+                <h3>Контакты</h3>
+                <p>Email: support@matan.ru</p>
+                <p>Telegram: @matan_support</p>
+            </div>
+        </div>
+    </footer>
 
-<footer class="footer">
-    <div class="footer-container">
-        <div class="footer-section">
-            <h3>MATAN</h3>
-            <p>Платформа для изучения точных наук</p>
-            <p>© {% now "Y" %} Все права защищены</p>
-        </div>
-        <div class="footer-section">
-            <h3>Навигация</h3>
-            <a href="{% url 'app:home' %}">Главная</a>
-            <a href="{% url 'app:f_f' %}">Формулы физики</a>
-            <a href="{% url 'app:t_a' %}">Теория алгебры</a>
-            <a href="{% url 'app:t_g' %}">Геометрия</a>
-            <a href="{% url 'app:formula_quiz' %}">Тесты</a>
-        </div>
-        <div class="footer-section">
-            <h3>Сообщество</h3>
-            <a href="{% url 'app:chat_home' %}">Чаты</a>
-            <a href="{% url 'app:manage_friends' %}">Друзья</a>
-            <a href="{% url 'app:profile' %}">Профиль</a>
-        </div>
-        <div class="footer-section">
-            <h3>Контакты</h3>
-            <p>Email: support@matan.ru</p>
-            <p>Telegram: @matan_support</p>
-        </div>
-    </div>
-</footer>
-
-<script src="{% static 'js/main.js' %}"></script>
-{% block extra_js %}{% endblock %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

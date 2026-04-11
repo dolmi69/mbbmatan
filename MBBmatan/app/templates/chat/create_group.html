@@ -63,6 +63,24 @@
     .btn-submit:hover {
         background: #27ae60;
     }
+    .friend-checkboxes {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fafafa;
+    }
+    .friend-checkbox-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .friend-checkbox-item:last-child {
+        border-bottom: none;
+    }
+    .friend-checkbox-item:hover {
+        background: #f0f0f0;
+    }
 </style>
 
 <div class="form-container">
@@ -80,15 +98,17 @@
         <div class="form-group">
             <label>Выберите друзей</label>
             <div class="friend-checkboxes">
-                {% for friend in form.friends.field.queryset %}
-                    <div class="friend-checkbox-item">
-                        <label>
-                            <input type="checkbox" name="friends" value="{{ friend.id }}">
-                            {{ friend.user.username }} (Ур. {{ friend.level }})
-                        </label>
-                    </div>
+                {% for friend in form.fields.friends.queryset %}
+                <div class="friend-checkbox-item">
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                        <input type="checkbox" name="friends" value="{{ friend.id }}">
+                        <i class="fas fa-user-circle" style="font-size:24px; color:#5a6e7c;"></i>
+                        <span>{{ friend.username }}</span>
+                        <span class="level-badge" style="margin-left:auto;">Ур. {{ friend.profile.level }}</span>
+                    </label>
+                </div>
                 {% empty %}
-                    <p>У вас нет друзей для добавления в группу.</p>
+                <p>У вас нет друзей для добавления.</p>
                 {% endfor %}
             </div>
         </div>

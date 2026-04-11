@@ -1,123 +1,195 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if form.instance.pk %}Редактирование{% else %}Новая{% endif %} заметка | MATAN{% endblock %}
+{% block title %}{% if form.instance.pk %}Редактирование{% else %}Новый{% endif %} конспект | MATAN{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+{% endblock %}
 
 {% block content %}
 <style>
     .form-container {
-        max-width: 700px;
-        margin: 40px auto;
+        max-width: 1000px;
+        margin: 30px auto;
         background: white;
-        padding: 35px;
+        padding: 30px;
         border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
-    .form-title {
-        margin-top: 0;
-        margin-bottom: 30px;
-        color: #2c3e50;
-        font-size: 28px;
-        text-align: center;
+    .mode-switch {
+        margin-bottom: 20px;
     }
-    .note-form .form-field {
-        margin-bottom: 25px;
+    .mode-switch label {
+        margin-right: 20px;
+        cursor: pointer;
     }
-    .note-form label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #34495e;
-    }
-    .note-form input,
-    .note-form textarea {
-        width: 100%;
-        padding: 14px 16px;
+    #canvas-editor {
         border: 1px solid #ddd;
         border-radius: 12px;
-        font-size: 16px;
-        font-family: inherit;
-        transition: border 0.2s;
+        overflow: hidden;
+        margin-top: 15px;
     }
-    .note-form textarea {
-        min-height: 200px;
-        resize: vertical;
+    .toolbar {
+        margin-bottom: 10px;
     }
-    .note-form input:focus,
-    .note-form textarea:focus {
-        border-color: #9b59b6;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
-    }
-    .form-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-top: 30px;
-    }
-    .btn-save {
-        background: #9b59b6;
-        color: white;
-        padding: 12px 30px;
-        border: none;
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: 600;
+    .toolbar button {
+        margin-right: 5px;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        background: white;
+        border-radius: 6px;
         cursor: pointer;
-        transition: background 0.2s;
     }
-    .btn-save:hover {
-        background: #8e44ad;
-    }
-    .btn-cancel {
-        background: #95a5a6;
+    .toolbar button.active {
+        background: #3498db;
         color: white;
-        padding: 12px 30px;
-        border-radius: 30px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: background 0.2s;
-    }
-    .btn-cancel:hover {
-        background: #7f8c8d;
-    }
-    .errorlist {
-        color: #e74c3c;
-        list-style: none;
-        padding: 0;
-        margin: 8px 0 0;
-        font-size: 14px;
+        border-color: #3498db;
     }
 </style>
 
 <div class="form-container">
-    <h2 class="form-title">
-        {% if form.instance.pk %}
-            <i class="fas fa-edit"></i> Редактировать заметку
-        {% else %}
-            <i class="fas fa-plus-circle"></i> Новая заметка
-        {% endif %}
-    </h2>
-
-    <form method="post" class="note-form">
+    <h2 style="margin-top:0;">{% if form.instance.pk %}Редактировать{% else %}Создать{% endif %} конспект</h2>
+    <form method="post" id="noteForm">
         {% csrf_token %}
-        {% for field in form %}
-            <div class="form-field">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.errors %}
-                    <ul class="errorlist">
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="title" class="form-control" value="{{ form.title.value|default:'' }}" placeholder="Введите название">
+        </div>
+
+        <div class="mode-switch">
+            <label><input type="radio" name="content_type" value="markdown" {% if form.instance.content_type != 'canvas' %}checked{% endif %}> Markdown (текст + формулы)</label>
+            <label><input type="radio" name="content_type" value="canvas" {% if form.instance.content_type == 'canvas' %}checked{% endif %}> Холст (рисование, текст, картинки)</label>
+        </div>
+
+        <!-- Markdown редактор -->
+        <div id="markdown-editor">
+            <textarea name="content_markdown" id="markdown-textarea">{{ form.content.value|default:'' }}</textarea>
+        </div>
+
+        <!-- Canvas редактор -->
+        <div id="canvas-editor" style="display:none;">
+            <div class="toolbar">
+                <button type="button" id="select-mode" class="active">Выбор</button>
+                <button type="button" id="draw-mode">Рисовать</button>
+                <button type="button" id="add-text">Добавить текст</button>
+                <button type="button" id="add-image">Добавить картинку</button>
+                <button type="button" id="delete-object">Удалить</button>
+                <button type="button" id="clear-canvas">Очистить</button>
+                <input type="file" id="image-upload" accept="image/*" style="display:none;">
             </div>
-        {% endfor %}
-        <div class="form-actions">
-            <a href="{% url 'app:note_list' %}" class="btn-cancel">Отмена</a>
-            <button type="submit" class="btn-save">Сохранить</button>
+            <canvas id="fabric-canvas" width="800" height="500" style="border:1px solid #ccc; width:100%; height:auto;"></canvas>
+            <input type="hidden" name="content_canvas" id="canvas-json" value="{{ form.content.value|default:'{}' }}">
+        </div>
+
+        <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
+            <a href="{% url 'app:note_list' %}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
+<script>
+    let easyMDE;
+    let canvas;
+    let currentMode = 'select';
+
+    const radioMarkdown = document.querySelector('input[value="markdown"]');
+    const radioCanvas = document.querySelector('input[value="canvas"]');
+    const markdownDiv = document.getElementById('markdown-editor');
+    const canvasDiv = document.getElementById('canvas-editor');
+
+    function toggleMode() {
+        if (radioCanvas.checked) {
+            markdownDiv.style.display = 'none';
+            canvasDiv.style.display = 'block';
+            initCanvas();
+        } else {
+            markdownDiv.style.display = 'block';
+            canvasDiv.style.display = 'none';
+            if (!easyMDE) {
+                easyMDE = new EasyMDE({ element: document.getElementById('markdown-textarea') });
+            }
+        }
+    }
+
+    radioMarkdown.addEventListener('change', toggleMode);
+    radioCanvas.addEventListener('change', toggleMode);
+
+    function initCanvas() {
+        if (canvas) return;
+        const canvasEl = document.getElementById('fabric-canvas');
+        canvas = new fabric.Canvas('fabric-canvas');
+        canvas.setWidth(800);
+        canvas.setHeight(500);
+
+        const jsonData = document.getElementById('canvas-json').value;
+        if (jsonData && jsonData !== '{}') {
+            canvas.loadFromJSON(jsonData, () => {
+                canvas.renderAll();
+            });
+        }
+
+        // Режимы
+        document.getElementById('select-mode').addEventListener('click', () => {
+            canvas.isDrawingMode = false;
+            canvas.selection = true;
+            canvas.forEachObject(obj => obj.selectable = true);
+        });
+        document.getElementById('draw-mode').addEventListener('click', () => {
+            canvas.isDrawingMode = true;
+            canvas.freeDrawingBrush.color = '#000';
+            canvas.freeDrawingBrush.width = 2;
+        });
+        document.getElementById('add-text').addEventListener('click', () => {
+            const text = new fabric.IText('Введите текст', {
+                left: 50,
+                top: 50,
+                fontFamily: 'Arial',
+                fontSize: 20,
+            });
+            canvas.add(text);
+            canvas.setActiveObject(text);
+        });
+        document.getElementById('delete-object').addEventListener('click', () => {
+            const active = canvas.getActiveObject();
+            if (active) {
+                canvas.remove(active);
+            }
+        });
+        document.getElementById('clear-canvas').addEventListener('click', () => {
+            canvas.clear();
+        });
+        document.getElementById('add-image').addEventListener('click', () => {
+            document.getElementById('image-upload').click();
+        });
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    fabric.Image.fromURL(ev.target.result, (img) => {
+                        img.scaleToWidth(200);
+                        canvas.add(img);
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('noteForm').addEventListener('submit', () => {
+            if (radioCanvas.checked) {
+                const json = JSON.stringify(canvas.toJSON());
+                document.getElementById('canvas-json').value = json;
+            }
+        });
+    }
+
+    // Запуск при загрузке
+    toggleMode();
+</script>
 {% endblock %}

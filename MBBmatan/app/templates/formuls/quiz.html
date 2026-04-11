@@ -157,22 +157,21 @@
 
 {% block extra_js %}
 <script>
+    // Прогресс-бар
     const progressFill = document.getElementById('progressFill');
     const current = {{ current_number }};
     const total = {{ total_questions }};
     progressFill.style.width = (current / total * 100) + '%';
 
+    // Таймер
     let timeLeft = 30;
     const timerEl = document.getElementById('timerDisplay');
     const form = document.getElementById('quizForm');
-
     const interval = setInterval(() => {
         timeLeft--;
         timerEl.textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(interval);
-            // Если время вышло, отправляем форму (можно с пустым ответом или пропуском)
-            // Создаём скрытое поле, чтобы обозначить пропуск по таймауту
             const skipInput = document.createElement('input');
             skipInput.type = 'hidden';
             skipInput.name = 'skip';
@@ -182,16 +181,14 @@
         }
     }, 1000);
 
-    form.addEventListener('submit', function() {
-        clearInterval(interval);
-    });
+    form.addEventListener('submit', () => clearInterval(interval));
 
+    // Интерактивный маскот
     document.getElementById('mascotClickable').addEventListener('click', function() {
         fetch('{% url "app:get_hint" %}')
             .then(response => response.json())
             .then(data => {
                 alert(data.hint);
-                // document.getElementById('mascotMessage').textContent = data.hint;
             })
             .catch(() => alert('Не удалось получить подсказку'));
     });

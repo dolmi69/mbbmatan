@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 from .forms import RegisterForm, LoginForm, CustomUserCreationForm, GroupChatForm
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from .models import (
     Note, ChatMessage, ChatRoom, FavoriteFormula, FormulaQuestion,
     TestAttempt, UserProfile, FriendRequest, User, Notification
@@ -15,22 +15,27 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 
+
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('app:login')
+
 
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/signup.html'
     success_url = reverse_lazy('login')
 
+
 def home(request):
     return render(request, 'index.html')
+
 
 class CustomLoginView(LoginView):
     form_class = LoginForm
     template_name = 'registration/login.html'
+
 
 @login_required
 def profile(request):
@@ -42,21 +47,26 @@ def profile(request):
     }
     return render(request, 'profile.html', context)
 
+
 class NoteListView(LoginRequiredMixin, ListView):
     model = Note
     template_name = "app/note_list.html"
     context_object_name = "notes"
+
     def get_queryset(self):
         return Note.objects.filter(user=self.request.user)
+
 
 class NoteCreateView(LoginRequiredMixin, CreateView):
     model = Note
     fields = ["title", "content"]
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
+
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
 
 class NoteUpdateView(LoginRequiredMixin, UpdateView):
     model = Note
@@ -64,9 +74,11 @@ class NoteUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
 
+
 class NoteDeleteView(LoginRequiredMixin, DeleteView):
     model = Note
     success_url = reverse_lazy("app:note_list")
+
 
 @login_required
 @require_POST
@@ -80,6 +92,7 @@ def toggle_favorite(request):
         favorite.delete()
         return JsonResponse({'status': 'removed'})
     return JsonResponse({'status': 'added'})
+
 
 def formula_quiz(request):
     if 'quiz_questions' not in request.session:
@@ -135,6 +148,7 @@ def formula_quiz(request):
         'mascot_message': mascot_message,
     })
 
+
 def quiz_result(request):
     if 'quiz_questions' not in request.session:
         return redirect('app:formula_quiz')
@@ -174,6 +188,7 @@ def quiz_result(request):
         'result_message': result_message,
     })
 
+
 @login_required
 def chat_home(request):
     general_chats = ChatRoom.objects.filter(
@@ -190,6 +205,7 @@ def chat_home(request):
         'private_rooms': private_rooms,
     })
 
+
 @login_required
 def subject_chat(request, subject):
     subject_map = {'physics': 'Физика', 'algebra': 'Алгебра', 'geometry': 'Геометрия'}
@@ -204,6 +220,7 @@ def subject_chat(request, subject):
     if request.user not in room.participants.all():
         room.participants.add(request.user)
     return redirect('app:chat_room', room_id=room.id)
+
 
 @login_required
 def chat_room(request, room_id):
@@ -230,9 +247,11 @@ def send_message(request, room_id):
     room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
     if request.user not in room.participants.all():
         return JsonResponse({'error': 'Нет доступа'}, status=403)
+
     message_text = request.POST.get('message', '').strip()
     if not message_text:
         return JsonResponse({'error': 'Пустое сообщение'}, status=400)
+
     reply_to_id = request.POST.get('reply_to')
     reply_to = None
     if reply_to_id:
@@ -240,19 +259,23 @@ def send_message(request, room_id):
             reply_to = ChatMessage.objects.get(id=reply_to_id, room=room)
         except ChatMessage.DoesNotExist:
             pass
+
     message = ChatMessage.objects.create(
         room=room,
         sender=request.user,
         message=message_text,
         reply_to=reply_to
     )
-    for participant in room.participants.exclude(id=request.user.id):
-        Notification.objects.create(
-            user=participant,
-            text=f'Новое сообщение от {request.user.username} в чате "{room.name}"',
-            link=f'/chat/{room.id}/',
-            notification_type='chat_message'
-        )
+
+    if room.room_type in ['private', 'group']:
+        for participant in room.participants.exclude(id=request.user.id):
+            Notification.objects.create(
+                user=participant,
+                text=f'Новое сообщение от {request.user.username} в чате "{room.name}"',
+                link=f'/chat/{room.id}/',
+                notification_type='chat_message'
+            )
+
     return JsonResponse({
         'success': True,
         'message_id': message.id,
@@ -268,6 +291,11 @@ def send_message(request, room_id):
 
 @login_required
 def manage_friends(request):
+    Notification.objects.filter(
+        user=request.user,
+        notification_type='friend_accepted',
+        is_read=False
+    ).update(is_read=True)
     if not hasattr(request.user, 'profile'):
         UserProfile.objects.create(user=request.user)
     friends_profiles = request.user.profile.friends.all()
@@ -279,6 +307,7 @@ def manage_friends(request):
         'received_requests': received_requests,
         'sent_requests': sent_requests,
     })
+
 
 @login_required
 @require_POST
@@ -323,6 +352,7 @@ def send_friend_request(request):
         messages.success(request, f'Заявка отправлена {username}')
     return redirect('app:manage_friends')
 
+
 @login_required
 def handle_friend_request(request, request_id, action):
     try:
@@ -352,6 +382,7 @@ def handle_friend_request(request, request_id, action):
             messages.info(request, 'Заявка отменена')
     return redirect('app:manage_friends')
 
+
 @login_required
 @require_POST
 def remove_friend(request):
@@ -369,6 +400,7 @@ def remove_friend(request):
         else:
             messages.error(request, 'Этот пользователь не в вашем списке друзей')
     return redirect('app:manage_friends')
+
 
 @login_required
 def start_private_chat(request, user_id):
@@ -389,11 +421,13 @@ def start_private_chat(request, user_id):
         room.participants.add(users[0], users[1])
     return redirect('app:chat_room', room_id=room.id)
 
+
 # Новые функции
 def user_profile_view(request, user_id):
     profile_user = get_object_or_404(User, id=user_id)
     show_stats = profile_user.profile.show_statistics if hasattr(profile_user, 'profile') else True
     return render(request, 'user_profile.html', {'profile_user': profile_user, 'show_stats': show_stats})
+
 
 @login_required
 def create_group_chat(request):
@@ -423,10 +457,12 @@ def create_group_chat(request):
         form = GroupChatForm(friends=friends)
     return render(request, 'chat/create_group.html', {'form': form})
 
+
 @login_required
 def notification_list(request):
     notifications = Notification.objects.filter(user=request.user)
     return render(request, 'notifications.html', {'notifications': notifications})
+
 
 @login_required
 @require_POST
@@ -435,6 +471,7 @@ def mark_notification_read(request, notification_id):
     notification.is_read = True
     notification.save()
     return redirect('app:notifications')
+
 
 @login_required
 def get_hint(request):
@@ -446,11 +483,29 @@ def get_hint(request):
         return JsonResponse({'hint': hint})
     return JsonResponse({'hint': 'Нет активного вопроса'})
 
+
 def f_f(request):
-    return render(request, 'formuls/f-f.html')
+    favorites = []
+    if request.user.is_authenticated:
+        favorites = list(FavoriteFormula.objects.filter(user=request.user).values_list('formula_text', flat=True))
+    import json
+    return render(request, 'formuls/f-f.html', {'favorites_json': json.dumps(favorites)})
+
 def t_f(request):
     return render(request, 'formuls/physics.html')
+
+
 def t_a(request):
     return render(request, 'formuls/algebra.html')
+
+
 def t_g(request):
     return render(request, 'formuls/geometry.html')
+
+class NoteDetailView(LoginRequiredMixin, DetailView):
+    model = Note
+    template_name = 'app/note_detail.html'
+    context_object_name = 'note'
+
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)

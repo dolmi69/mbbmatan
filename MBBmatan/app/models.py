@@ -5,19 +5,33 @@ from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.db import transaction
 from .encryption import encrypt_message, decrypt_message
+import markdown
 
 User = get_user_model()
 
 
 class Note(models.Model):
+    CONTENT_TYPES = [
+        ('markdown', 'Markdown'),
+        ('canvas', 'Холст'),
+    ]
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True)
-    content = models.TextField()
+    content_type = models.CharField(max_length=20, choices=CONTENT_TYPES, default='markdown')
+    content = models.TextField(blank=True)
+    content_html = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.title or f"Заметка #{self.id}"
+    def save(self, *args, **kwargs):
+        if self.content_type == 'markdown':
+            self.content_html = markdown.markdown(
+                self.content,
+                extensions=['extra', 'codehilite', 'nl2br', 'sane_lists']
+            )
+        else:
+            self.content_html = ''
+        super().save(*args, **kwargs)
 
 
 class FavoriteFormula(models.Model):

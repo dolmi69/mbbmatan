@@ -66,13 +66,25 @@
         <div class="friend-grid">
             {% for req in received_requests %}
             <div class="friend-card">
-                <div>
-                    <a href="{% url 'app:user_profile' req.from_user.id %}">{{ req.from_user.username }}</a>
-                    <div style="font-size:12px; color:#777;">{{ req.created_at|date:"d.m.Y" }}</div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-user-circle" style="font-size: 40px; color: #5a6e7c;"></i>
+                    <div>
+                        <a href="{% url 'app:user_profile' req.from_user.id %}"
+                           style="font-weight:600; font-size:16px;">
+                            {{ req.from_user.username }}
+                        </a>
+                        <div style="font-size:12px; color:#777;">{{ req.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
                 </div>
                 <div class="request-actions">
-                    <a href="{% url 'app:handle_friend_request' req.id 'accept' %}" class="btn btn-success btn-sm">✓</a>
-                    <a href="{% url 'app:handle_friend_request' req.id 'reject' %}" class="btn btn-danger btn-sm">✕</a>
+                    <a href="{% url 'app:handle_friend_request' req.id 'accept' %}" class="btn btn-success btn-sm"
+                       title="Принять">
+                        <i class="fas fa-check"></i> Принять
+                    </a>
+                    <a href="{% url 'app:handle_friend_request' req.id 'reject' %}"
+                       class="btn btn-outline-danger btn-sm" title="Отклонить">
+                        <i class="fas fa-times"></i> Отклонить
+                    </a>
                 </div>
             </div>
             {% endfor %}
@@ -87,7 +99,8 @@
             {% for req in sent_requests %}
             <div class="friend-card">
                 <a href="{% url 'app:user_profile' req.to_user.id %}">{{ req.to_user.username }}</a>
-                <a href="{% url 'app:handle_friend_request' req.id 'cancel' %}" class="btn btn-warning btn-sm">Отменить</a>
+                <a href="{% url 'app:handle_friend_request' req.id 'cancel' %}"
+                   class="btn btn-warning btn-sm">Отменить</a>
             </div>
             {% endfor %}
         </div>
@@ -105,7 +118,8 @@
                     <div style="font-size:12px;">Ур. {{ friend.profile.level }}</div>
                 </div>
                 <div>
-                    <a href="{% url 'app:start_private_chat' friend.id %}" class="btn btn-sm"><i class="fas fa-comment"></i></a>
+                    <a href="{% url 'app:start_private_chat' friend.id %}" class="btn btn-sm"><i
+                            class="fas fa-comment"></i></a>
                     <form method="post" action="{% url 'app:remove_friend' %}" style="display:inline;">
                         {% csrf_token %}
                         <input type="hidden" name="username" value="{{ friend.username }}">
