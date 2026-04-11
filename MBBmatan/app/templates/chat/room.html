@@ -1,694 +1,197 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ room.name }} | Чат</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #777;
-            padding: 15px 20px;
-            color: white;
-            position: relative;
-        }
+{% block title %}{{ room.name }} | Чат{% endblock %}
 
-        .nav-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+{% block extra_css %}
+<style>
+    .chat-room {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 200px);
+        min-height: 500px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .chat-header {
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .chat-header h2 {
+        margin: 0;
+        color: #2c3e50;
+    }
+    .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .message {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        background: #ecf0f1;
+        align-self: flex-start;
+        position: relative;
+    }
+    .own-message {
+        background: #3498db;
+        color: white;
+        align-self: flex-end;
+    }
+    .message-sender {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+        color: inherit;
+        text-decoration: none;
+    }
+    .message-sender:hover {
+        text-decoration: underline;
+    }
+    .message-time {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 5px;
+        text-align: right;
+    }
+    .reply-preview {
+        background: rgba(0,0,0,0.05);
+        padding: 8px 12px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        border-left: 3px solid #3498db;
+    }
+    .message-input-area {
+        padding: 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+    .reply-indicator {
+        background: #e9ecef;
+        padding: 8px 15px;
+        border-radius: 20px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .btn-send {
+        background: #2ecc71;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        nav a.nav-btn {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            overflow: hidden;
-        }
-
-        .login-btn a {
-            display: block;
-            padding: 10px 15px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .login-btn:hover {
-            background: #27ae60;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .username {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .chat-room-container {
-            padding: 20px;
-            margin-top: 20px;
-            flex: 1;
-        }
-
-        .chat-header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .back-btn {
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            background: black;
-            color: white;
-        }
-
-        .back-btn:hover {
-            background: #333;
-            transform: translateX(-5px);
-        }
-
-        .chat-header h1 {
-            font-size: 28px;
-            color: #333;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .chat-header p {
-            color: #666;
-            font-size: 16px;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        .messages-container {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 500px;
-            overflow-y: auto;
-        }
-
-        .message {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            max-width: 75%;
-            animation: fadeIn 0.3s ease;
-            opacity: 0;
-            transform: translateY(10px);
-            animation-fill-mode: forwards;
-            border: 1px solid #e0e0e0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .message:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .message.selected {
-            background: #f0f8ff;
-            border-color: #3498db;
-            border-width: 2px;
-        }
-
-        .message.reply-to {
-            background: #f9f9f9;
-            border-left: 4px solid #3498db;
-            margin-bottom: 5px;
-            padding: 10px 15px;
-            font-size: 14px;
-            opacity: 0.8;
-            cursor: default;
-        }
-
-        .message.reply-to:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .reply-info {
-            font-size: 12px;
-            color: #3498db;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .reply-info i {
-            font-size: 10px;
-        }
-
-        .reply-preview {
-            font-style: italic;
-            color: #666;
-            border-left: 2px solid #ddd;
-            padding-left: 8px;
-            margin: 5px 0;
-            font-size: 14px;
-            max-height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .own-message {
-            background: #e6f7ff;
-            margin-left: auto;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .own-message .message-header strong {
-            color: #333;
-        }
-
-        .message-header small {
-            color: #888;
-            font-size: 12px;
-        }
-
-        .own-message .message-header small {
-            color: #666;
-        }
-
-        .message-content {
-            word-wrap: break-word;
-            line-height: 1.5;
-        }
-
-        .empty-message {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-            font-style: italic;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .message-input {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .message-input form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .reply-preview-container {
-            background: #f9f9f9;
-            border-radius: 5px;
-            padding: 10px;
-            border-left: 4px solid #3498db;
-            display: none;
-        }
-
-        .reply-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .reply-text {
-            font-size: 14px;
-            color: #666;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .cancel-reply {
-            background: none;
-            border: none;
-            color: #e74c3c;
-            cursor: pointer;
-            font-size: 14px;
-            padding: 2px 8px;
-            border-radius: 3px;
-        }
-
-        .cancel-reply:hover {
-            background: #ffeaea;
-        }
-
-        .input-row {
-            display: flex;
-            gap: 12px;
-        }
-
-        .message-input input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .message-input input:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .message-input button {
-            padding: 15px 35px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .message-input button:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-
-        .message-input button:active {
-            transform: translateY(0);
-        }
-
-        .login-prompt {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .login-prompt p {
-            color: #666;
-            margin-bottom: 15px;
-        }
-
-        .login-links {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .login-links a {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 20px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .login-links a:hover {
-            background: #333;
-            transform: translateY(-2px);
-        }
-
-        .login-links a:first-child {
-            background: #3498db;
-        }
-
-        .login-links a:first-child:hover {
-            background: #2980b9;
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb:hover {
-            background: #a1a1a1;
-        }
-
-        footer {
-            background: #777;
-            text-align: center;
-            padding: 10px;
-            color: white;
-            margin-top: auto;
-        }
-
-        @media (max-width: 768px) {
-            .input-row {
-                flex-direction: column;
-            }
-
-            .message-input button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .message {
-                max-width: 85%;
-            }
-
-            .login-links {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-    </style>
-</head>
-<body>
-<header>
-    <a href="{% url 'app:home' %}" class="logo">MATAN</a>
-    <nav>
-        <a href="{% url 'app:home' %}" class="nav-btn active nav-center">ГЛАВНАЯ</a>
-        {% if user.is_authenticated %}
-        <div class="user-info">
-            <span class="username">{{ user.username }}</span>
-        </div>
-        {% else %}
-        <button class="login-btn">
-            <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
-        </button>
-        {% endif %}
-    </nav>
-</header>
-
-<div class="chat-room-container">
+{% block content %}
+<div class="chat-room">
     <div class="chat-header">
-        <a href="{% url 'app:chat_home' %}" class="back-btn">
-            ← Назад к чатам
-        </a>
-        <h1>{{ room.name }}</h1>
-        {% if room.description %}
-        <p>{{ room.description }}</p>
-        {% endif %}
+        <a href="{% url 'app:chat_home' %}" class="btn" style="margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Назад</a>
+        <h2>{{ room.name }}</h2>
+        <p style="margin:5px 0 0; color:#6c757d;">{{ room.description }}</p>
     </div>
 
     <div class="messages-container" id="messagesContainer">
-        {% for message in messages %}
-        <div class="message {% if message.sender == user %}own-message{% endif %}"
-             id="message-{{ message.id }}"
-             data-message-id="{{ message.id }}"
-             data-sender="{{ message.sender.username }}"
-             data-content="{{ message.message }}"
-             data-reply-to="{% if message.reply_to %}{{ message.reply_to.id }}{% endif %}"
-             style="animation-delay: {{ forloop.counter|add:"-1"|divisibleby:2|yesno:"0.1s,0s" }};">
-            {% if message.reply_to %}
-            <div class="reply-info">
-                <i>↩</i> Ответ на сообщение от {{ message.reply_to.sender.username }}
+        {% for msg in messages %}
+        <div class="message {% if msg.sender == user %}own-message{% endif %}" id="msg-{{ msg.id }}">
+            {% if msg.reply_to %}
+            <div class="reply-preview">
+                <i class="fas fa-reply"></i> {{ msg.reply_to.sender.username }}: {{ msg.reply_to.message|truncatechars:50 }}
             </div>
-            <div class="reply-preview">{{ message.reply_to.message }}</div>
             {% endif %}
-            <div class="message-header">
-                <strong>{{ message.sender.username }}</strong>
-                <small>{{ message.timestamp|date:"H:i" }}</small>
-            </div>
-            <div class="message-content">
-                {{ message.message }}
-            </div>
+            <a href="{% url 'app:user_profile' msg.sender.id %}" class="message-sender">{{ msg.sender.username }}</a>
+            <div>{{ msg.message|linebreaksbr }}</div>
+            <div class="message-time">{{ msg.timestamp|date:"H:i" }}</div>
         </div>
         {% empty %}
-        <div class="empty-message" id="emptyMessage">
-            <p style="font-size: 18px;">Пока нет сообщений</p>
-            <p style="color: #888; margin-top: 5px;">Начните общение первым!</p>
-        </div>
+        <p style="text-align:center; color:#aaa;">Пока нет сообщений. Начните общение!</p>
         {% endfor %}
     </div>
 
     {% if user.is_authenticated %}
-    <div class="message-input">
+    <div class="message-input-area">
         <form id="messageForm">
             {% csrf_token %}
-            <div class="reply-preview-container" id="replyPreview">
-                <div class="reply-header">
-                    <div class="reply-text">Ответ на сообщение от <span id="replySender"></span>:</div>
-                    <button type="button" class="cancel-reply" id="cancelReply">× Отменить</button>
-                </div>
-                <div class="reply-preview" id="replyContent"></div>
+            <div class="reply-indicator" id="replyIndicator" style="display:none;">
+                <span>↩️ Ответ <span id="replyUsername"></span></span>
+                <button type="button" id="cancelReply" style="background:none;border:none;color:#e74c3c;cursor:pointer;">✕</button>
             </div>
-            <div class="input-row">
-                <input
-                    type="text"
-                    placeholder="Введите сообщение..."
-                    id="messageInput"
-                    autocomplete="off"
-                    required
-                >
-                <button type="submit" id="sendButton">Отправить</button>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="messageInput" placeholder="Введите сообщение..." style="flex:1; padding:12px 15px; border:1px solid #ddd; border-radius:30px;">
+                <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i> Отправить</button>
             </div>
         </form>
     </div>
     {% else %}
-    <div class="login-prompt">
-        <p>Чтобы отправлять сообщения, необходимо войти в систему</p>
-        <div class="login-links">
-            <a href="{% url 'app:login' %}">Войти</a>
-            <a href="{% url 'app:signup' %}">Зарегистрироваться</a>
-        </div>
+    <div style="padding:20px; text-align:center;">
+        <a href="{% url 'app:login' %}" class="btn btn-primary">Войдите, чтобы писать сообщения</a>
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
-<footer>
-    <p>Контакты: @Artem_hvhv</p>
-</footer>
-
+{% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const messages = document.querySelectorAll('.message:not(.reply-to)');
-        messages.forEach((message, index) => {
-            setTimeout(() => {
-                message.style.animation = 'fadeIn 0.3s ease forwards';
-            }, index * 100);
+    const roomId = {{ room.id }};
+    const sendUrl = "{% url 'app:send_message' room.id %}";
+    let replyToId = null;
+    const messageInput = document.getElementById('messageInput');
+    const replyIndicator = document.getElementById('replyIndicator');
+    const replyUsernameSpan = document.getElementById('replyUsername');
+
+    document.querySelectorAll('.message').forEach(msgDiv => {
+        msgDiv.addEventListener('click', function(e) {
+            if (e.target.closest('a')) return;
+            const sender = this.querySelector('.message-sender').textContent;
+            const msgId = this.id.replace('msg-', '');
+            replyToId = msgId;
+            replyUsernameSpan.textContent = sender;
+            replyIndicator.style.display = 'flex';
+            messageInput.focus();
         });
     });
 
-    let selectedMessage = null;
-    const messagesContainer = document.getElementById('messagesContainer');
-    const replyPreview = document.getElementById('replyPreview');
-    const replySender = document.getElementById('replySender');
-    const replyContent = document.getElementById('replyContent');
-    const cancelReplyBtn = document.getElementById('cancelReply');
-    const messageInput = document.getElementById('messageInput');
-    const messageForm = document.getElementById('messageForm');
-
-    messagesContainer.addEventListener('click', function(e) {
-        const messageElement = e.target.closest('.message');
-        if (!messageElement || messageElement.classList.contains('own-message')) return;
-
-        if (selectedMessage) {
-            selectedMessage.classList.remove('selected');
-        }
-
-        if (selectedMessage === messageElement) {
-            selectedMessage = null;
-            replyPreview.style.display = 'none';
-        } else {
-            selectedMessage = messageElement;
-            messageElement.classList.add('selected');
-
-            const sender = messageElement.dataset.sender;
-            const content = messageElement.dataset.content;
-
-            replySender.textContent = sender;
-            replyContent.textContent = content;
-            replyPreview.style.display = 'block';
-
-            messageInput.focus();
-        }
+    document.getElementById('cancelReply').addEventListener('click', function() {
+        replyToId = null;
+        replyIndicator.style.display = 'none';
     });
 
-    cancelReplyBtn.addEventListener('click', function() {
-        if (selectedMessage) {
-            selectedMessage.classList.remove('selected');
-            selectedMessage = null;
-        }
-        replyPreview.style.display = 'none';
-        messageInput.focus();
-    });
-
-    messageForm.addEventListener('submit', function(e) {
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
         e.preventDefault();
-
-        const input = document.getElementById('messageInput');
-        let text = input.value.trim();
+        const text = messageInput.value.trim();
         if (!text) return;
 
         const formData = new FormData();
         formData.append('message', text);
+        if (replyToId) formData.append('reply_to', replyToId);
 
-        if (selectedMessage) {
-            formData.append('reply_to', selectedMessage.dataset.messageId);
-        }
-
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        fetch("{% url 'app:send_message' room.id %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": csrfToken,
-            },
+        fetch(sendUrl, {
+            method: 'POST',
+            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
             body: formData
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Network error");
-            return res.json();
-        })
-        .then(data => {
-            const container = document.getElementById('messagesContainer');
-            const emptyMessage = document.getElementById('emptyMessage');
-
-            if (emptyMessage) {
-                emptyMessage.remove();
+        }).then(res => res.json()).then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Ошибка');
             }
-
-            const div = document.createElement('div');
-            div.className = "message own-message";
-            div.style.opacity = "0";
-            div.style.transform = "translateY(10px)";
-            div.setAttribute('data-message-id', data.id || 'new');
-
-            let messageHTML = '';
-
-            if (selectedMessage) {
-                messageHTML += `
-                    <div class="reply-info">
-                        <i>↩</i> Ответ на сообщение от ${selectedMessage.dataset.sender}
-                    </div>
-                    <div class="reply-preview">${selectedMessage.dataset.content}</div>
-                `;
-            }
-
-            messageHTML += `
-                <div class="message-header">
-                    <strong>${data.username}</strong>
-                    <small>${data.timestamp}</small>
-                </div>
-                <div class="message-content">${data.message}</div>
-            `;
-
-            div.innerHTML = messageHTML;
-
-            container.appendChild(div);
-
-            setTimeout(() => {
-                div.style.animation = 'fadeIn 0.3s ease forwards';
-            }, 10);
-
-            container.scrollTop = container.scrollHeight;
-            input.value = '';
-
-            if (selectedMessage) {
-                selectedMessage.classList.remove('selected');
-                selectedMessage = null;
-            }
-            replyPreview.style.display = 'none';
-        })
-        .catch(() => {
-            alert("Ошибка сети. Попробуйте еще раз.");
         });
     });
-</script>
 
-</body>
-</html>
+    // Автопрокрутка вниз
+    const container = document.getElementById('messagesContainer');
+    container.scrollTop = container.scrollHeight;
+</script>
+{% endblock %}

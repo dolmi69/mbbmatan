@@ -1,336 +1,114 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATAN</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #777;
-            padding: 15px 20px;
-            color: white;
-            position: relative;
-        }
+{% block title %}Геометрия | MATAN{% endblock %}
 
-        .nav-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+{% block content %}
+<style>
+    .theory-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    .theory-container h1 {
+        color: #2c3e50;
+        margin-top: 0;
+        text-align: center;
+    }
+    .search-box {
+        margin-bottom: 30px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 1px solid #ddd;
+        border-radius: 40px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+    .term-item {
+        margin-bottom: 25px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: transform 0.2s;
+    }
+    .term-item:hover {
+        transform: translateX(5px);
+    }
+    .term-item h3 {
+        margin: 0 0 10px;
+        color: #27ae60;
+        border-left: 4px solid #27ae60;
+        padding-left: 15px;
+    }
+    .term-item p {
+        margin: 0;
+        line-height: 1.7;
+        color: #34495e;
+        padding-left: 19px;
+    }
+    .no-results {
+        text-align: center;
+        padding: 30px;
+        color: #7f8c8d;
+        display: none;
+    }
+</style>
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        nav a.nav-btn {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            overflow: hidden;
-        }
-
-        .login-btn a {
-            display: block;
-            padding: 10px 15px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .login-btn:hover {
-            background: #27ae60;
-        }
-
-        main {
-            padding: 20px;
-            flex: 1;
-        }
-
-        .search-wrapper {
-            background: #f8f5e6;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .search-container {
-            width: 80%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        #searchInput {
-            width: 100%;
-            padding: 14px 25px;
-            border: 2px solid #c4b8a8;
-            border-radius: 30px;
-            font-size: 16px;
-            background: #fffcf5;
-            transition: all 0.3s;
-        }
-
-        #searchInput:focus {
-            outline: none;
-            border-color: #9b59b6;
-            box-shadow: 0 0 12px rgba(155, 89, 182, 0.2);
-        }
-
-        .no-results {
-            text-align: center;
-            color: #6b5d4d;
-            padding: 30px 0;
-            display: none;
-        }
-
-        .block {
-            margin: 10px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .geometry-terms {
-            background: #f5f2e9;
-            border: 1px solid #d6d0c1;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 20px 0;
-        }
-
-        .term-item {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #fffcf5;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .term-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .term-item h3 {
-            color: #7a6b5a;
-            font-size: 1.2em;
-            margin: 0 0 12px 0;
-            padding-left: 15px;
-            border-left: 4px solid #a89f8e;
-        }
-
-        .term-item p {
-            margin: 0;
-            line-height: 1.7;
-            color: #5e5347;
-            font-size: 15px;
-            padding-left: 15px;
-        }
-
-        footer {
-            background: #777;
-            text-align: center;
-            padding: 10px;
-            color: white;
-            margin-top: auto;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">MATAN</div>
-        <nav>
-            <a href="/home/" class="nav-btn active nav-center">ГЛАВНАЯ</a>
-            {% if user.is_authenticated %}
-            <div class="user-info">
-                <a href="/profile" class="username">{{ user.username }}</a>
-            </div>
-            {% else %}
-            <button class="login-btn">
-                <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
-            </button>
-            {% endif %}
-        </nav>
-    </header>
-
-    <div class="search-wrapper">
-        <div class="search-container">
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="Поиск по геометрическим терминам..."
-                autocomplete="off"
-            >
+<div class="theory-container">
+    <h1><i class="fas fa-shapes"></i> Геометрические понятия</h1>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Поиск по терминам...">
+    </div>
+    <div id="termsContainer">
+        <div class="term-item">
+            <h3>Точка, прямая, плоскость</h3>
+            <p>Точка — объект без размеров; прямая — бесконечная линия; плоскость — бесконечная ровная поверхность.</p>
+        </div>
+        <div class="term-item">
+            <h3>Угол</h3>
+            <p>Фигура, образованная двумя лучами с общим началом.</p>
+        </div>
+        <div class="term-item">
+            <h3>Виды углов</h3>
+            <p>Прямой (90°), острый (<90°), тупой (>90°), развёрнутый (180°).</p>
+        </div>
+        <div class="term-item">
+            <h3>Теорема Пифагора</h3>
+            <p>В прямоугольном треугольнике квадрат гипотенузы равен сумме квадратов катетов: c² = a² + b².</p>
+        </div>
+        <div class="term-item">
+            <h3>Площадь круга</h3>
+            <p>S = π·r²</p>
         </div>
     </div>
+    <div class="no-results" id="noResults">Ничего не найдено</div>
+</div>
+{% endblock %}
 
-    <main>
-        <div class="block geometry-terms">
-            <h2>Основные геометрические понятия</h2>
+{% block extra_js %}
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const items = document.querySelectorAll('.term-item');
+    const noResults = document.getElementById('noResults');
 
-            <div class="no-results" id="noResults">
-                Ничего не найдено. Попробуйте другой запрос
-            </div>
-
-            <div class="term-item">
-                <h3>Точка, прямая, плоскость</h3>
-                <p>Точка — это объект без размеров, прямая — бесконечная линия, плоскость — бесконечная плоская поверхность.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Отрезок</h3>
-                <p>Часть прямой, ограниченная двумя точками.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Луч</h3>
-                <p>Часть прямой, которая имеет начало, но не имеет конца.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Угол</h3>
-                <p>Фигура, образованная двумя лучами, выходящими из одной точки.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Виды углов</h3>
-                <p>Прямой угол равен 90 градусов, острый — меньше 90 градусов, тупой — больше 90 градусов, развёрнутый — 180 градусов.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Смежные углы</h3>
-                <p>Два угла, у которых одна сторона общая, а две другие образуют прямую линию. Сумма смежных углов равна 180 градусов.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Вертикальные углы</h3>
-                <p>Два угла, образованные при пересечении двух прямых. Вертикальные углы равны.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Треугольник</h3>
-                <p>Фигура, образованная тремя сторонами и тремя углами.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Виды треугольников</h3>
-                <p>По сторонам — равносторонний, равнобедренный, разносторонний; по углам — остроугольный, прямоугольный, тупоугольный.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Сумма углов треугольника</h3>
-                <p>Сумма углов любого треугольника равна 180 градусов.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Прямоугольный треугольник</h3>
-                <p>Треугольник, у которого один угол равен 90 градусов.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Теорема Пифагора</h3>
-                <p>В прямоугольном треугольнике квадрат гипотенузы равен сумме квадратов катетов.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Подобные треугольники</h3>
-                <p>Треугольники, у которых соответствующие углы равны, а стороны пропорциональны.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Четырёхугольник</h3>
-                <p>Фигура, образованная четырьмя сторонами и четырьмя углами.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Параллелограмм</h3>
-                <p>Четырёхугольник, у которого противоположные стороны параллельны и равны.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Прямоугольник</h3>
-                <p>Параллелограмм, у которого все углы прямые.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Ромб</h3>
-                <p>Параллелограмм, у которого все стороны равны.</p>
-            </div>
-
-            <div class="term-item">
-                <h3>Квадрат</h3>
-                <p>Прямоугольник, у которого все стороны равны.</p>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>Контакты:</p>
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const terms = document.querySelectorAll('.term-item');
-            const noResults = document.getElementById('noResults');
-
-            function performSearch() {
-                const searchText = this.value.trim().toLowerCase();
-                let visibleCount = 0;
-
-                terms.forEach(term => {
-                    const content = term.textContent.toLowerCase();
-                    const isVisible = content.includes(searchText);
-
-                    term.style.display = isVisible ? 'block' : 'none';
-                    if(isVisible) visibleCount++;
-                });
-
-                noResults.style.display = visibleCount === 0 && searchText !== '' ? 'block' : 'none';
+    searchInput.addEventListener('input', function() {
+        const term = this.value.toLowerCase().trim();
+        let visible = 0;
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(term)) {
+                item.style.display = 'block';
+                visible++;
+            } else {
+                item.style.display = 'none';
             }
-
-            const debounceSearch = (func, delay = 300) => {
-                let timeout;
-                return function() {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, arguments), delay);
-                };
-            };
-
-            searchInput.addEventListener('input', debounceSearch(performSearch));
         });
-    </script>
-</body>
-</html>
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+    });
+</script>
+{% endblock %}

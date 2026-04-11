@@ -1,349 +1,123 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Друзья | MATAN</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-            min-height: 100vh;
-        }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #777;
-            padding: 15px 20px;
-            color: white;
-        }
+{% block title %}Друзья | MATAN{% endblock %}
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-        }
+{% block content %}
+<style>
+    .friends-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .section {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    .friend-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .friend-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+    .request-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+    .input-group input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 30px;
+    }
+</style>
 
-        .nav-btn {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
+<div class="friends-container">
+    <h1><i class="fas fa-users"></i> Друзья</h1>
 
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .section {
-            margin-bottom: 40px;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-        }
-
-        .section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .input-group input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: #4361ee;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #3a0ca3;
-        }
-
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-warning {
-            background: #f39c12;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #e67e22;
-        }
-
-        .btn-sm {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        .request-list, .friends-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .request-card, .friend-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-            transition: transform 0.3s;
-        }
-
-        .request-card:hover, .friend-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-avatar {
-            font-size: 32px;
-        }
-
-        .user-details strong {
-            display: block;
-            font-size: 18px;
-            color: #2c3e50;
-        }
-
-        .user-details span {
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .empty-message {
-            text-align: center;
-            padding: 40px;
-            color: #95a5a6;
-            font-size: 18px;
-            font-style: italic;
-        }
-
-        .messages {
-            margin-bottom: 20px;
-        }
-
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 20px;
-            background: #9b59b6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-<header>
-    <div class="logo">MATAN</div>
-    <a href="{% url 'app:home' %}" class="nav-btn active nav-center">ГЛАВНАЯ</a>
-    <nav></nav>
-</header>
-
-<div class="container">
-    <h1>👥 Управление друзьями</h1>
-
-    <!-- Сообщения -->
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Форма отправки заявки -->
     <div class="section">
-        <h2>📤 Отправить заявку в друзья</h2>
+        <h3>📤 Отправить заявку</h3>
         <form method="post" action="{% url 'app:send_friend_request' %}">
             {% csrf_token %}
             <div class="input-group">
-                <input type="text" name="username" placeholder="Введите имя пользователя" required>
-                <button type="submit" class="btn btn-primary">Отправить заявку</button>
+                <input type="text" name="username" placeholder="Имя пользователя" required>
+                <button type="submit" class="btn btn-primary">Отправить</button>
             </div>
         </form>
     </div>
 
-    <!-- Входящие заявки -->
+    {% if received_requests %}
     <div class="section">
-        <h2>📥 Входящие заявки ({{ received_requests.count }})</h2>
-        {% if received_requests %}
-        <div class="request-list">
-            {% for request in received_requests %}
-            <div class="request-card">
-                <div class="user-info">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-details">
-                        <strong>{{ request.from_user.username }}</strong>
-                        <span>{{ request.created_at|date:"d.m.Y H:i" }}</span>
-                    </div>
+        <h3>📥 Входящие заявки ({{ received_requests.count }})</h3>
+        <div class="friend-grid">
+            {% for req in received_requests %}
+            <div class="friend-card">
+                <div>
+                    <a href="{% url 'app:user_profile' req.from_user.id %}">{{ req.from_user.username }}</a>
+                    <div style="font-size:12px; color:#777;">{{ req.created_at|date:"d.m.Y" }}</div>
                 </div>
-                <div class="actions">
-                    <a href="{% url 'app:handle_friend_request' request.id 'accept' %}"
-                       class="btn btn-success btn-sm">Принять</a>
-                    <a href="{% url 'app:handle_friend_request' request.id 'reject' %}"
-                       class="btn btn-danger btn-sm">Отклонить</a>
+                <div class="request-actions">
+                    <a href="{% url 'app:handle_friend_request' req.id 'accept' %}" class="btn btn-success btn-sm">✓</a>
+                    <a href="{% url 'app:handle_friend_request' req.id 'reject' %}" class="btn btn-danger btn-sm">✕</a>
                 </div>
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <p class="empty-message">Нет входящих заявок</p>
-        {% endif %}
     </div>
+    {% endif %}
 
+    {% if sent_requests %}
     <div class="section">
-        <h2>📤 Исходящие заявки ({{ sent_requests.count }})</h2>
-        {% if sent_requests %}
-        <div class="request-list">
-            {% for request in sent_requests %}
-            <div class="request-card">
-                <div class="user-info">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-details">
-                        <strong>{{ request.to_user.username }}</strong>
-                        <span>Отправлено: {{ request.created_at|date:"d.m.Y H:i" }}</span>
-                        <span>Статус: {{ request.get_status_display }}</span>
-                    </div>
-                </div>
-                <div class="actions">
-                    <a href="{% url 'app:handle_friend_request' request.id 'cancel' %}"
-                       class="btn btn-warning btn-sm">Отменить</a>
-                </div>
+        <h3>📤 Исходящие заявки</h3>
+        <div class="friend-grid">
+            {% for req in sent_requests %}
+            <div class="friend-card">
+                <a href="{% url 'app:user_profile' req.to_user.id %}">{{ req.to_user.username }}</a>
+                <a href="{% url 'app:handle_friend_request' req.id 'cancel' %}" class="btn btn-warning btn-sm">Отменить</a>
             </div>
             {% endfor %}
         </div>
-        {% else %}
-        <p class="empty-message">Нет отправленных заявок</p>
-        {% endif %}
     </div>
+    {% endif %}
 
     <div class="section">
-        <h2>👥 Ваши друзья ({{ friends.count }})</h2>
+        <h3>👥 Мои друзья ({{ friends.count }})</h3>
         {% if friends %}
-        <div class="friends-grid">
+        <div class="friend-grid">
             {% for friend in friends %}
             <div class="friend-card">
-                <div class="user-info">
-                    <div class="user-avatar">👤</div>
-                    <div class="user-details">
-                        <strong>{{ friend.username }}</strong>
-                        <span>Уровень: {% if friend.profile %}{{ friend.profile.level }}{% else %}1{% endif %}</span>
-                    </div>
+                <div>
+                    <a href="{% url 'app:user_profile' friend.id %}">{{ friend.username }}</a>
+                    <div style="font-size:12px;">Ур. {{ friend.profile.level }}</div>
                 </div>
-                <div class="actions">
-                    <a href="{% url 'app:start_private_chat' friend.id %}"
-                       class="btn btn-primary btn-sm">
-                        Написать
-                    </a>
-
-                    <form method="post" action="{% url 'app:remove_friend' %}" style="display: inline;">
+                <div>
+                    <a href="{% url 'app:start_private_chat' friend.id %}" class="btn btn-sm"><i class="fas fa-comment"></i></a>
+                    <form method="post" action="{% url 'app:remove_friend' %}" style="display:inline;">
                         {% csrf_token %}
                         <input type="hidden" name="username" value="{{ friend.username }}">
-                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-user-minus"></i></button>
                     </form>
                 </div>
-
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="empty-message">У вас пока нет друзей 😔</p>
+        <p>У вас пока нет друзей. Найдите их по имени пользователя!</p>
         {% endif %}
     </div>
-
-    <a href="{% url 'app:profile' %}" class="back-btn">← Назад в профиль</a>
 </div>
-</body>
-</html>
+{% endblock %}

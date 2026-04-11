@@ -1,494 +1,72 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATAN</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-        }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #777;
-            padding: 15px 20px;
-            color: white;
-            position: relative;
-        }
-
-        .nav-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        }
-
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        nav a.nav-btn {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-
-
-        .login-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            overflow: hidden;
-        }
-
-        .login-btn a {
-            display: block;
-            padding: 10px 15px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .login-btn:hover {
-            background: #27ae60;
-        }
-
-        main {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            padding: 20px;
-             margin-top: 80px;
-        }
-
-        .block {
-            flex: 1;
-            min-width: 250px;
-            margin: 10px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .formulas { background: #3498db; color: white; }
-        .favorites { background: #e74c3c; color: white; }
-        .theory { background: #f1c40f; color: white; }
-        .notebook {
-            background: #9b59b6;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 500px;
-            padding: 0;
-        }
-
-        h2 {
-            margin-bottom: 10px;
-            text-align: center;
-            position: relative;
-        }
-
-        h2::after {
-        content: '';
-        display: block;
-        width: 50px;
-        height: 2px;
-        background: rgba(255, 255, 255, 0.3);
-        margin: 15px auto 20px;
-        }
-
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        ul li {
-            width: 100%;
-            text-align: center;
-        }
-
-        ul li a {
-            text-decoration: none;
-            color: inherit;
-            font-weight: bold;
-            display: inline-block;
-            padding: 8px 20px;
-            transition: all 0.3s ease;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 200px;
-        }
-
-        ul li:first-child {
-        margin-top: 60px;
-        }
-
-        ul li a:hover {
-            text-decoration: none;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .theory ul li a:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .notebook a {
-            text-decoration: none;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
-            transition: background 0.3s;
-            padding: 20px;
-            text-align: center;
-        }
-.notebook a:hover {
-            background: #8e44ad;
-        }
-
-        footer {
-            background: #777;
-            text-align: center;
-            padding: 10px;
-            color: white;
-            margin-top: 177px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .username {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-            transition: text-decoration 0.3s;
-        }
-
-        .username:hover {
-            text-decoration: underline;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #c0392b;
-        }
-
-        .container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            max-width: 400px;
-            margin: 50px auto;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .formula {
-            font-family: Arial, sans-serif;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .heart-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .heart {
-            font-size: 32px;
-            color: #666;
-            transition: color 0.3s ease;
-        }
-
-        .heart.active {
-            color: #ff4081;
-        }
-
-        .heart-btn:hover .heart {
-            transform: scale(1.1);
-        }
-
-        .heart-btn:active .heart {
-            transform: scale(0.9);
-        }
-
-        .block {
-            background: #fffcf5;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e0d8cc;
-        }
-
-        .block h2 {
-            color: #6b5d4d;
-            font-size: 26px;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-            padding-bottom: 15px;
-        }
-
-        .block h2::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 2px;
-            background: #d4c9b8;
-            margin: 15px auto 25px;
-        }
-
-        .formulas ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            column-count: 2;
-            column-gap: 30px;
-        }
-
-        .formulas li {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #faf7f0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            break-inside: avoid;
-            border: 1px solid #ede6da;
-        }
-
-        .formulas li:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .formulas h3 {
-            color: #7a6b5a;
-            font-size: 18px;
-            margin: 0 0 12px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #e0d8cc;
-        }
-
-        .formulas p {
-            margin: 0;
-            line-height: 1.7;
-            font-size: 15px;
-            color: #5e5347;
-        }
-
-        .physics-laws {
-            background: #faf7f0;
-            border: 1px solid #e0d8cc;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 20px 0;
-        }
-
-        .physics-laws h2 {
-            color: #6b5d4d;
-            font-size: 26px;
-            text-align: center;
-            margin-bottom: 35px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #d4c9b8;
-        }
-
-        .law-item {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #fffcf5;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .law-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .law-item h3 {
-            color: #8a7c6c;
-            font-size: 1.2em;
-            margin: 0 0 12px 0;
-            padding-left: 15px;
-            border-left: 4px solid #a89f8e;
-        }
-
-        .law-item p {
-            margin: 0;
-            line-height: 1.7;
-            color: #5e5347;
-            font-size: 15px;
-            padding-left: 15px;
-        }
-
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">MATAN</div>
-        <nav>
-            <a href="/home/" class="nav-btn active nav-center">ГЛАВНАЯ</a>
-            {% if user.is_authenticated %}
-            <div class="user-info">
-                <a href="/profile" class="username">{{ user.username }}</a>
-            </div>
-            {% else %}
-            <button class="login-btn">
-                <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
-            </button>
-            {% endif %}
-        </nav>
-    </header>
-
-    <main>
-        <div class="block physics-laws">
-            <h2>Основные физические законы</h2>
-
-            <div class="law-item">
-                <h3>Закон Архимеда</h3>
-                <p>Тело, погружённое в жидкость или газ, выталкивается с силой, равной весу вытесненной жидкости или газа.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон Паскаля</h3>
-                <p>Давление, созданное на жидкость или газ, передаётся одинаково во всех направлениях.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон Ома</h3>
-                <p>Сила тока в проводнике зависит от напряжения и сопротивления: чем больше напряжение, тем больше ток, а чем больше сопротивление, тем меньше ток.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Первый закон Ньютона</h3>
-                <p>Если на тело не действуют силы, оно либо покоится, либо движется равномерно и прямолинейно.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Второй закон Ньютона</h3>
-                <p>Ускорение тела зависит от силы, которая на него действует, и массы тела: чем больше сила, тем больше ускорение, а чем больше масса, тем меньше ускорение.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Третий закон Ньютона</h3>
-                <p>Два тела взаимодействуют с силами, равными по величине и противоположными по направлению.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон сохранения импульса</h3>
-                <p>В замкнутой системе сумма импульсов всех тел остаётся постоянной.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон всемирного тяготения</h3>
-                <p>Все тела притягиваются друг к другу с силой, которая зависит от их масс и расстояния между ними.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон Джоуля-Ленца</h3>
-                <p>При прохождении тока через проводник выделяется тепло, которое зависит от силы тока, сопротивления и времени.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон отражения света</h3>
-                <p>Угол падения луча света равен углу отражения, и оба луча лежат в одной плоскости.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон преломления света</h3>
-                <p>При переходе из одной среды в другую луч света меняет направление, и это зависит от свойств сред.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Удельная теплоёмкость</h3>
-                <p>Каждое вещество требует разного количества тепла для нагревания на один градус.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Удельная теплота плавления</h3>
-                <p>Для плавления вещества требуется определённое количество тепла, даже если температура не меняется.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Удельная теплота парообразования</h3>
-                <p>Для превращения жидкости в пар нужно определённое количество тепла.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Правило левой руки</h3>
-                <p>Если расположить левую руку определённым образом, можно определить направление силы, действующей на проводник с током в магнитном поле.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Правило буравчика</h3>
-                <p>Если вкручивать буравчик по направлению тока, то направление вращения ручки покажет направление магнитных линий.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон электромагнитной индукции</h3>
-                <p>Изменение магнитного поля вокруг проводника вызывает появление электрического тока.</p>
-            </div>
-
-            <div class="law-item">
-                <h3>Закон сохранения энергии</h3>
-                <p>Энергия не исчезает и не появляется, она только превращается из одной формы в другую.</p>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>Контакты:</p>
-    </footer>
-</body>
-</html>
+{% block title %}Теория физики | MATAN{% endblock %}
+
+{% block content %}
+<style>
+    .theory-container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    .theory-container h1 {
+        color: #2c3e50;
+        margin-top: 0;
+        text-align: center;
+    }
+    .law-item {
+        margin-bottom: 25px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        transition: transform 0.2s;
+    }
+    .law-item:hover {
+        transform: translateX(5px);
+    }
+    .law-item h3 {
+        margin: 0 0 10px;
+        color: #3498db;
+        border-left: 4px solid #3498db;
+        padding-left: 15px;
+    }
+    .law-item p {
+        margin: 0;
+        line-height: 1.7;
+        color: #34495e;
+        padding-left: 19px;
+    }
+</style>
+
+<div class="theory-container">
+    <h1><i class="fas fa-microchip"></i> Основные законы физики</h1>
+    <div class="law-item">
+        <h3>Закон Архимеда</h3>
+        <p>На тело, погружённое в жидкость или газ, действует выталкивающая сила, равная весу вытесненной жидкости или газа.</p>
+    </div>
+    <div class="law-item">
+        <h3>Закон Ома</h3>
+        <p>Сила тока в проводнике прямо пропорциональна напряжению и обратно пропорциональна сопротивлению.</p>
+    </div>
+    <div class="law-item">
+        <h3>Первый закон Ньютона</h3>
+        <p>Существуют такие системы отсчёта, относительно которых тело сохраняет состояние покоя или равномерного прямолинейного движения, если на него не действуют другие тела или их действие скомпенсировано.</p>
+    </div>
+    <div class="law-item">
+        <h3>Второй закон Ньютона</h3>
+        <p>Ускорение тела прямо пропорционально равнодействующей сил, приложенных к телу, и обратно пропорционально его массе.</p>
+    </div>
+    <div class="law-item">
+        <h3>Третий закон Ньютона</h3>
+        <p>Силы, с которыми два тела действуют друг на друга, равны по модулю и противоположны по направлению.</p>
+    </div>
+    <div class="law-item">
+        <h3>Закон сохранения энергии</h3>
+        <p>Энергия не возникает и не исчезает, а только превращается из одного вида в другой.</p>
+    </div>
+</div>
+{% endblock %}

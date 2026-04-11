@@ -1,118 +1,53 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ошибка | MATAN</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+{% extends 'base.html' %}
+{% load static %}
 
-        .error-container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 600px;
-            text-align: center;
-            position: relative;
-        }
+{% block title %}Ошибка | MATAN{% endblock %}
 
-        .error-title {
-            color: #e74c3c;
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
+{% block content %}
+<style>
+    .error-container {
+        max-width: 550px;
+        margin: 60px auto;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    .error-icon {
+        font-size: 70px;
+        color: #e74c3c;
+        margin-bottom: 20px;
+    }
+    .error-title {
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+    .error-message {
+        color: #555;
+        margin-bottom: 35px;
+        font-size: 18px;
+    }
+    .mascot-wrapper {
+        max-width: 200px;
+        margin: 0 auto 30px;
+    }
+</style>
 
-        .error-message {
-            color: #2c3e50;
-            font-size: 18px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        .error-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        /* ИСПРАВЛЕНО: Маскот по центру */
-        .mascot-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 30px;
-            height: 180px; /* Фиксированная высота */
-        }
-
-        .mascot-wrapper {
-            width: 150px;
-            height: 150px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin: 0 auto; /* Центрирование */
-        }
-
-        /* Чтобы SVG маскота занимал всю доступную область */
-        .mascot-wrapper svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <div class="mascot-container">
-            <div class="mascot-wrapper">
-                {% include 'mascot/wrong.html' %}
-            </div>
-        </div>
-
-        <h1 class="error-title">Ошибка</h1>
-
-        <div class="error-message">
-            {{ message|default:"Произошла ошибка" }}
-        </div>
-
-        <div class="error-actions">
-            <a href="{% url 'app:home' %}" class="btn btn-primary">На главную</a>
-            <a href="javascript:history.back()" class="btn btn-primary">Назад</a>
-        </div>
+<div class="error-container">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
     </div>
-</body>
-</html>
+    <div class="mascot-wrapper">
+        {% include 'mascot/wrong.html' %}
+    </div>
+    <h2 class="error-title">Упс! Что-то пошло не так</h2>
+    <div class="error-message">
+        {{ message|default:"Произошла непредвиденная ошибка." }}
+    </div>
+    <div style="display: flex; gap: 15px; justify-content: center;">
+        <a href="{% url 'app:home' %}" class="btn btn-primary"><i class="fas fa-home"></i> На главную</a>
+        <a href="javascript:history.back()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Назад</a>
+    </div>
+</div>
+{% endblock %}

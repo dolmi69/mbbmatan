@@ -1,127 +1,131 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Чат | MATAN{% endblock %}
+{% block title %}Чаты | MATAN{% endblock %}
 
 {% block content %}
-<div class="chat-container">
-    <h1>📝 Чаты</h1>
-    
-    <div class="chat-sections">
-        <div class="section">
-            <h2>📚 Общие чаты</h2>
-            <div class="chat-list">
-                <a href="#" class="chat-card">
-                    <div class="chat-icon">👥</div>
-                    <div class="chat-info">
-                        <h3>Общий чат</h3>
-                        <p>Обсуждение математики и физики</p>
-                    </div>
-                </a>
-                <a href="#" class="chat-card">
-                    <div class="chat-icon">⚡</div>
-                    <div class="chat-info">
-                        <h3>Физика</h3>
-                        <p>Формулы и законы физики</p>
-                    </div>
-                </a>
-                <a href="#" class="chat-card">
-                    <div class="chat-icon">📐</div>
-                    <div class="chat-info">
-                        <h3>Геометрия</h3>
-                        <p>Фигуры и теоремы</p>
-                    </div>
-                </a>
-            </div>
+<style>
+    .chat-home {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .section-title {
+        font-size: 24px;
+        margin: 30px 0 20px;
+        color: #2c3e50;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 10px;
+    }
+    .chat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .chat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .chat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .chat-icon {
+        width: 50px;
+        height: 50px;
+        background: #ecf0f1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #5a6e7c;
+    }
+    .chat-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+    }
+    .chat-info p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 14px;
+    }
+    .empty-message {
+        background: #f8f9fa;
+        padding: 30px;
+        text-align: center;
+        border-radius: 15px;
+        color: #7f8c8d;
+    }
+    .create-group-btn {
+        margin-bottom: 20px;
+        text-align: right;
+    }
+</style>
+
+<div class="chat-home">
+    <h1><i class="fas fa-comments"></i> Чаты</h1>
+
+    {% if user.is_authenticated %}
+        <div class="create-group-btn">
+            <a href="{% url 'app:create_group_chat' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Создать группу
+            </a>
         </div>
-        
-        <div class="section">
-            <h2>👤 Ваши чаты</h2>
-            <div class="chat-list">
-                {% for room in user_rooms %}
+    {% endif %}
+
+    <h2 class="section-title">📚 Предметные чаты</h2>
+    <div class="chat-grid">
+        <a href="{% url 'app:subject_chat' 'physics' %}" class="chat-card">
+            <div class="chat-icon"><i class="fas fa-atom"></i></div>
+            <div class="chat-info">
+                <h3>Физика</h3>
+                <p>Обсуждение законов и формул</p>
+            </div>
+        </a>
+        <a href="{% url 'app:subject_chat' 'algebra' %}" class="chat-card">
+            <div class="chat-icon"><i class="fas fa-square-root-alt"></i></div>
+            <div class="chat-info">
+                <h3>Алгебра</h3>
+                <p>Уравнения, функции, графики</p>
+            </div>
+        </a>
+        <a href="{% url 'app:subject_chat' 'geometry' %}" class="chat-card">
+            <div class="chat-icon"><i class="fas fa-shapes"></i></div>
+            <div class="chat-info">
+                <h3>Геометрия</h3>
+                <p>Фигуры, теоремы, построения</p>
+            </div>
+        </a>
+    </div>
+
+    <h2 class="section-title">💬 Личные и групповые чаты</h2>
+    {% if private_rooms %}
+        <div class="chat-grid">
+            {% for room in private_rooms %}
                 <a href="{% url 'app:chat_room' room.id %}" class="chat-card">
-                    <div class="chat-icon">💬</div>
+                    <div class="chat-icon"><i class="fas fa-user-friends"></i></div>
                     <div class="chat-info">
                         <h3>{{ room.name }}</h3>
-                        <p>{{ room.description|truncatechars:50 }}</p>
+                        <p>{{ room.description|default:""|truncatechars:50 }}</p>
+                        <small>Участников: {{ room.participants.count }}</small>
                     </div>
                 </a>
-                {% empty %}
-                <p class="empty-message">У вас пока нет активных чатов</p>
-                {% endfor %}
-            </div>
+            {% endfor %}
         </div>
-    </div>
+    {% else %}
+        <div class="empty-message">
+            <i class="fas fa-comment-slash" style="font-size: 40px; opacity:0.5;"></i>
+            <p>У вас пока нет личных или групповых чатов.</p>
+            <p>Добавьте друзей и создайте группу!</p>
+        </div>
+    {% endif %}
 </div>
-
-<style>
-.chat-container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.chat-sections {
-    display: grid;
-    gap: 30px;
-}
-
-.section h2 {
-    color: #4361ee;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #eee;
-}
-
-.chat-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.chat-card {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 20px;
-    background: white;
-    border-radius: 12px;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.chat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-}
-
-.chat-icon {
-    font-size: 24px;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f2f5;
-    border-radius: 50%;
-}
-
-.chat-info h3 {
-    margin: 0 0 5px 0;
-    color: #2c3e50;
-}
-
-.chat-info p {
-    margin: 0;
-    color: #7f8c8d;
-    font-size: 14px;
-}
-
-.empty-message {
-    text-align: center;
-    padding: 30px;
-    color: #95a5a6;
-    font-style: italic;
-}
-</style>
 {% endblock %}

@@ -1,218 +1,113 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MATAN</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: #f8f5e6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #777;
-            padding: 15px 20px;
-            color: white;
-            position: relative;
-        }
+{% block title %}Мои заметки | MATAN{% endblock %}
 
-        .nav-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+{% block content %}
+<style>
+    .notes-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .notes-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 25px;
+    }
+    .notes-header h1 {
+        margin: 0;
+        color: #2c3e50;
+    }
+    .create-btn {
+        background: #9b59b6;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    .create-btn:hover {
+        background: #8e44ad;
+    }
+    .notes-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .note-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 25px;
+        border-bottom: 1px solid #ecf0f1;
+        transition: background 0.2s;
+    }
+    .note-item:last-child {
+        border-bottom: none;
+    }
+    .note-item:hover {
+        background: #fafafa;
+    }
+    .note-title {
+        font-size: 18px;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    .note-actions a {
+        margin-left: 15px;
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 18px;
+        transition: color 0.2s;
+    }
+    .note-actions a:hover {
+        color: #2c3e50;
+    }
+    .empty-notes {
+        padding: 40px;
+        text-align: center;
+        color: #7f8c8d;
+        background: white;
+        border-radius: 20px;
+    }
+</style>
 
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-        }
+<div class="notes-container">
+    <div class="notes-header">
+        <h1><i class="fas fa-sticky-note"></i> Мои заметки</h1>
+        <a href="{% url 'app:note_create' %}" class="create-btn">
+            <i class="fas fa-plus"></i> Новая заметка
+        </a>
+    </div>
 
-        nav {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        nav a.nav-btn {
-            text-decoration: none;
-            color: white;
-            background: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-
-        .login-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            overflow: hidden;
-        }
-
-        .login-btn a {
-            display: block;
-            padding: 10px 15px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .login-btn:hover {
-            background: #27ae60;
-        }
-
-        main {
-            padding: 20px;
-            margin-top: 80px;
-            flex: 1;
-        }
-
-        .notes-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .notes-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .notes-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .note-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            transition: background 0.3s;
-        }
-
-        .note-item:hover {
-            background: #f9f9f9;
-        }
-
-        .note-actions a {
-            margin-left: 15px;
-            font-size: 18px;
-            color: #777;
-            transition: opacity 0.3s;
-        }
-
-        .note-actions a:hover {
-            opacity: 0.7;
-            text-decoration: none;
-        }
-
-        .create-btn {
-            background: #9b59b6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-
-        .create-btn:hover {
-            background: #8e44ad;
-            color: white;
-        }
-
-        footer {
-            background: #777;
-            text-align: center;
-            padding: 10px;
-            color: white;
-            margin-top: auto;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .username {
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">MATAN</div>
-        <nav>
-            <a href="/home/" class="nav-btn active nav-center">ГЛАВНАЯ</a>
-            {% if user.is_authenticated %}
-            <div class="user-info">
-                <a href="/profile" class="username">{{ user.username }}</a>
-                <a href="{% url 'app:logout' %}" class="logout-btn">Выйти</a>
-            </div>
-            {% else %}
-            <button class="login-btn">
-                <a href="{% url 'app:login' %}" class="login-link">Перейти к авторизации</a>
-            </button>
-            {% endif %}
-        </nav>
-    </header>
-
-    <main>
-        <div class="notes-container">
-            <div class="notes-header">
-                <h1>Мои заметки</h1>
-                <a href="{% url 'app:note_create' %}" class="create-btn">Создать новую</a>
-            </div>
-
-            <ul class="notes-list">
-                {% for note in notes %}
+    {% if notes %}
+        <ul class="notes-list">
+            {% for note in notes %}
                 <li class="note-item">
-                    <span>{{ note.title }}</span>
+                    <span class="note-title">{{ note.title|default:"Без названия" }}</span>
                     <div class="note-actions">
-                        <a href="{% url 'app:note_update' note.pk %}" title="Редактировать">✏️</a>
-                        <a href="{% url 'app:note_delete' note.pk %}" title="Удалить">🗑️</a>
+                        <a href="{% url 'app:note_update' note.pk %}" title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'app:note_delete' note.pk %}" title="Удалить">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
                     </div>
                 </li>
-                {% empty %}
-                <li class="note-item">Пока нет заметок</li>
-                {% endfor %}
-            </ul>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-notes">
+            <i class="fas fa-pen" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i>
+            <p>У вас пока нет заметок.</p>
+            <a href="{% url 'app:note_create' %}" class="btn btn-primary" style="margin-top: 15px;">Создать первую</a>
         </div>
-    </main>
-
-    <footer>
-        <p>Контакты:</p>
-    </footer>
-</body>
-</html>
+    {% endif %}
+</div>
+{% endblock %}
