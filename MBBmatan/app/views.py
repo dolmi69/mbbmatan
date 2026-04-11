@@ -5,7 +5,7 @@ from .forms import RegisterForm, LoginForm, CustomUserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Note, ChatMessage, ChatRoom, FavoriteFormula, FormulaQuestion, TestAttempt, UserProfile, \
-    FriendRequest, User
+    FriendRequest, User, Notification
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 import random
@@ -257,15 +257,29 @@ def chat_room(request, room_id):
         messages.error(request, 'У вас нет доступа к этому чату')
         return redirect('app:chat_home')
 
-    if room.room_type in ['physics', 'algebra', 'geometry']:
+    if room.room_type in ['physics', 'algebra', 'geometry', 'group']:
         if request.user not in room.participants.all():
             room.participants.add(request.user)
 
-    messages = ChatMessage.objects.filter(room=room).order_by('timestamp')[:100]
+    ChatMessage.objects.filter(
+        room=room,
+        is_read=False
+    ).exclude(
+        sender=request.user
+    ).update(is_read=True)
+
+    Notification.objects.filter(
+        user=request.user,
+        notification_type='chat_message',
+        link=f'/chat/{room.id}/',
+        is_read=False
+    ).update(is_read=True)
+
+    chat_messages = ChatMessage.objects.filter(room=room).select_related('sender', 'reply_to', 'reply_to__sender').order_by('timestamp')[:100]
 
     return render(request, 'chat/room.html', {
         'room': room,
-        'messages': messages,
+        'messages': chat_messages,
     })
 
 
@@ -281,20 +295,44 @@ def send_message(request, room_id):
     if not message_text:
         return JsonResponse({'error': 'Пустое сообщение'}, status=400)
 
+    reply_to_id = request.POST.get('reply_to')
+    reply_to = None
+    if reply_to_id:
+        try:
+            reply_to = ChatMessage.objects.get(id=reply_to_id, room=room)
+        except ChatMessage.DoesNotExist:
+            pass
+
     message = ChatMessage.objects.create(
         room=room,
         sender=request.user,
-        message=message_text
+        message=message_text,
+        reply_to=reply_to
     )
 
-    return JsonResponse({
+    for participant in room.participants.all():
+        if participant != request.user:
+            Notification.objects.create(
+                user=participant,
+                text=f'Новое сообщение от {request.user.username} в чате "{room.name}"',
+                link=f'/chat/{room.id}/',
+                notification_type='chat_message'
+            )
+
+    response_data = {
         'success': True,
         'message_id': message.id,
         'sender': message.sender.username,
         'message': message.message,
         'timestamp': message.timestamp.strftime('%H:%M'),
-    })
+        'reply_to': {
+            'id': reply_to.id,
+            'sender': reply_to.sender.username,
+            'message': reply_to.message
+        } if reply_to else None
+    }
 
+    return JsonResponse(response_data)
 
 def f_f(request):
     return render(request, 'formuls/f-f.html')

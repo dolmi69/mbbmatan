@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
+from django.db import transaction
+from .encryption import encrypt_message, decrypt_message
 
 User = get_user_model()
 
@@ -114,6 +116,7 @@ class ChatRoom(models.Model):
         ('algebra', 'Алгебра'),
         ('geometry', 'Геометрия'),
         ('private', 'Приватный'),
+        ('group', 'Групповой'),
     ]
 
     name = models.CharField(max_length=100)
@@ -126,6 +129,12 @@ class ChatRoom(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
+
+    def get_last_message(self):
+        return self.messages.order_by('-timestamp').first()
+
+    def get_unread_count(self, user):
+        return self.messages.filter(is_read=False).exclude(sender=user).count()
 
     @classmethod
     def get_or_create_general_chats(cls):
@@ -157,26 +166,42 @@ class ChatRoom(models.Model):
                 }
             )
 
-
 class ChatMessage(models.Model):
-    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField()
+    _message = models.TextField(db_column='message')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    reply_to = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='replies'
+    )
+
+    @property
+    def message(self):
+        return decrypt_message(self._message)
+
+    @message.setter
+    def message(self, value):
+        self._message = encrypt_message(value)
+
+    def __str__(self):
+        try:
+            preview = self.message[:30] + '...' if len(self.message) > 30 else self.message
+        except:
+            preview = '***'
+        return f"{self.sender.username}: {preview}"
 
     class Meta:
         ordering = ['timestamp']
-
-    def __str__(self):
-        return f"{self.sender.username}: {self.message[:30]}..."
 
 @receiver(post_migrate)
 def create_initial_data(sender, **kwargs):
     if hasattr(sender, 'name') and sender.name == 'app':
         try:
-            from django.db import transaction
-
             initial_questions = [
                 {
                     "formula": "Какая формула выражает закон Архимеда?",
@@ -280,3 +305,28 @@ class FriendRequest(models.Model):
             self.save()
             return True
         return False
+
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('friend_request', 'Заявка в друзья'),
+        ('friend_accepted', 'Заявка принята'),
+        ('chat_message', 'Новое сообщение'),
+        ('test_completed', 'Тест пройден'),
+        ('achievement', 'Достижение'),
+        ('system', 'Системное'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    text = models.CharField(max_length=255)
+    link = models.CharField(max_length=200, blank=True)
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='system')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.text[:50]}"
