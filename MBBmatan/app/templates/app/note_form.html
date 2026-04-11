@@ -10,31 +10,20 @@
 {% block content %}
 <style>
     .form-container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 30px auto;
         background: white;
         padding: 30px;
         border-radius: 20px;
         box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
-    .mode-switch {
-        margin-bottom: 20px;
-    }
-    .mode-switch label {
-        margin-right: 20px;
-        cursor: pointer;
-    }
-    #canvas-editor {
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        overflow: hidden;
-        margin-top: 15px;
-    }
     .toolbar {
-        margin-bottom: 10px;
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
     }
-    .toolbar button {
-        margin-right: 5px;
+    .toolbar button, .toolbar select {
         padding: 8px 12px;
         border: 1px solid #ccc;
         background: white;
@@ -46,40 +35,48 @@
         color: white;
         border-color: #3498db;
     }
+    #fabric-canvas {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        width: 100%;
+        height: auto;
+        background: white;
+    }
 </style>
 
 <div class="form-container">
-    <h2 style="margin-top:0;">{% if form.instance.pk %}Редактировать{% else %}Создать{% endif %} конспект</h2>
+    <h2>{% if form.instance.pk %}Редактировать{% else %}Создать{% endif %} конспект</h2>
     <form method="post" id="noteForm">
         {% csrf_token %}
         <div class="form-group">
             <label>Название</label>
-            <input type="text" name="title" class="form-control" value="{{ form.title.value|default:'' }}" placeholder="Введите название">
+            <input type="text" name="title" class="form-control" value="{{ form.title.value|default:'' }}" placeholder="Введите название" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
         </div>
 
-        <div class="mode-switch">
-            <label><input type="radio" name="content_type" value="markdown" {% if form.instance.content_type != 'canvas' %}checked{% endif %}> Markdown (текст + формулы)</label>
-            <label><input type="radio" name="content_type" value="canvas" {% if form.instance.content_type == 'canvas' %}checked{% endif %}> Холст (рисование, текст, картинки)</label>
+        <div class="form-group">
+            <label>Текст конспекта (Markdown, формулы через $...$ или $$...$$)</label>
+            <textarea name="content" id="markdown-textarea">{{ form.content.value|default:'' }}</textarea>
         </div>
 
-        <!-- Markdown редактор -->
-        <div id="markdown-editor">
-            <textarea name="content_markdown" id="markdown-textarea">{{ form.content.value|default:'' }}</textarea>
-        </div>
-
-        <!-- Canvas редактор -->
-        <div id="canvas-editor" style="display:none;">
+        <div class="form-group">
+            <label>Холст (рисование, текст, картинки) — необязательно</label>
             <div class="toolbar">
                 <button type="button" id="select-mode" class="active">Выбор</button>
                 <button type="button" id="draw-mode">Рисовать</button>
-                <button type="button" id="add-text">Добавить текст</button>
-                <button type="button" id="add-image">Добавить картинку</button>
+                <button type="button" id="add-text">Текст</button>
+                <button type="button" id="add-image">Картинка</button>
                 <button type="button" id="delete-object">Удалить</button>
                 <button type="button" id="clear-canvas">Очистить</button>
+                <select id="formula-select" style="margin-left:auto;">
+                    <option value="">Вставить формулу...</option>
+                    {% for fav in user.favoriteformula_set.all %}
+                        <option value="{{ fav.formula_text }}">{{ fav.formula_text }}</option>
+                    {% endfor %}
+                </select>
                 <input type="file" id="image-upload" accept="image/*" style="display:none;">
             </div>
-            <canvas id="fabric-canvas" width="800" height="500" style="border:1px solid #ccc; width:100%; height:auto;"></canvas>
-            <input type="hidden" name="content_canvas" id="canvas-json" value="{{ form.content.value|default:'{}' }}">
+            <canvas id="fabric-canvas" width="800" height="500"></canvas>
+            <input type="hidden" name="canvas_data" id="canvas-json" value="{{ form.instance.canvas_data|default:'{}' }}">
         </div>
 
         <div style="margin-top:20px; display:flex; justify-content:flex-end; gap:10px;">
@@ -94,102 +91,106 @@
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
 <script>
-    let easyMDE;
-    let canvas;
-    let currentMode = 'select';
+    // Инициализация EasyMDE
+    const easyMDE = new EasyMDE({
+        element: document.getElementById('markdown-textarea'),
+        spellChecker: false,
+        placeholder: 'Пишите текст, используйте $E=mc^2$ для формул...',
+    });
 
-    const radioMarkdown = document.querySelector('input[value="markdown"]');
-    const radioCanvas = document.querySelector('input[value="canvas"]');
-    const markdownDiv = document.getElementById('markdown-editor');
-    const canvasDiv = document.getElementById('canvas-editor');
+    // Инициализация Fabric.js
+    const canvasEl = document.getElementById('fabric-canvas');
+    const canvas = new fabric.Canvas('fabric-canvas');
+    canvas.setWidth(800);
+    canvas.setHeight(500);
 
-    function toggleMode() {
-        if (radioCanvas.checked) {
-            markdownDiv.style.display = 'none';
-            canvasDiv.style.display = 'block';
-            initCanvas();
+    // Загрузка сохранённых данных холста
+    const jsonData = document.getElementById('canvas-json').value;
+    if (jsonData && jsonData !== '{}') {
+        canvas.loadFromJSON(jsonData, () => {
+            canvas.renderAll();
+        });
+    }
+
+    // Режимы
+    document.getElementById('select-mode').addEventListener('click', () => {
+        canvas.isDrawingMode = false;
+        canvas.selection = true;
+        canvas.forEachObject(obj => obj.selectable = true);
+    });
+    document.getElementById('draw-mode').addEventListener('click', () => {
+        canvas.isDrawingMode = true;
+        canvas.freeDrawingBrush.color = '#000';
+        canvas.freeDrawingBrush.width = 2;
+    });
+    document.getElementById('add-text').addEventListener('click', () => {
+        const text = new fabric.IText('Текст', {
+            left: 50,
+            top: 50,
+            fontFamily: 'Arial',
+            fontSize: 20,
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+    });
+    document.getElementById('delete-object').addEventListener('click', () => {
+        const active = canvas.getActiveObject();
+        if (active) {
+            canvas.remove(active);
+            canvas.renderAll();
         } else {
-            markdownDiv.style.display = 'block';
-            canvasDiv.style.display = 'none';
-            if (!easyMDE) {
-                easyMDE = new EasyMDE({ element: document.getElementById('markdown-textarea') });
-            }
+            alert('Выберите объект для удаления');
         }
-    }
-
-    radioMarkdown.addEventListener('change', toggleMode);
-    radioCanvas.addEventListener('change', toggleMode);
-
-    function initCanvas() {
-        if (canvas) return;
-        const canvasEl = document.getElementById('fabric-canvas');
-        canvas = new fabric.Canvas('fabric-canvas');
-        canvas.setWidth(800);
-        canvas.setHeight(500);
-
-        const jsonData = document.getElementById('canvas-json').value;
-        if (jsonData && jsonData !== '{}') {
-            canvas.loadFromJSON(jsonData, () => {
-                canvas.renderAll();
-            });
-        }
-
-        // Режимы
-        document.getElementById('select-mode').addEventListener('click', () => {
-            canvas.isDrawingMode = false;
-            canvas.selection = true;
-            canvas.forEachObject(obj => obj.selectable = true);
-        });
-        document.getElementById('draw-mode').addEventListener('click', () => {
-            canvas.isDrawingMode = true;
-            canvas.freeDrawingBrush.color = '#000';
-            canvas.freeDrawingBrush.width = 2;
-        });
-        document.getElementById('add-text').addEventListener('click', () => {
-            const text = new fabric.IText('Введите текст', {
-                left: 50,
-                top: 50,
-                fontFamily: 'Arial',
-                fontSize: 20,
-            });
-            canvas.add(text);
-            canvas.setActiveObject(text);
-        });
-        document.getElementById('delete-object').addEventListener('click', () => {
-            const active = canvas.getActiveObject();
-            if (active) {
-                canvas.remove(active);
-            }
-        });
-        document.getElementById('clear-canvas').addEventListener('click', () => {
+    });
+    document.getElementById('clear-canvas').addEventListener('click', () => {
+        if (confirm('Очистить холст?')) {
             canvas.clear();
-        });
-        document.getElementById('add-image').addEventListener('click', () => {
-            document.getElementById('image-upload').click();
-        });
-        document.getElementById('image-upload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    fabric.Image.fromURL(ev.target.result, (img) => {
-                        img.scaleToWidth(200);
-                        canvas.add(img);
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        }
+    });
+    document.getElementById('add-image').addEventListener('click', () => {
+        document.getElementById('image-upload').click();
+    });
+    document.getElementById('image-upload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                fabric.Image.fromURL(ev.target.result, (img) => {
+                    img.scaleToWidth(200);
+                    canvas.add(img);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
-        document.getElementById('noteForm').addEventListener('submit', () => {
-            if (radioCanvas.checked) {
-                const json = JSON.stringify(canvas.toJSON());
-                document.getElementById('canvas-json').value = json;
-            }
+    // Вставка формулы
+    document.getElementById('formula-select').addEventListener('change', (e) => {
+        const formula = e.target.value;
+        if (!formula) return;
+        const text = new fabric.IText(formula, {
+            left: 100,
+            top: 100,
+            fontFamily: 'Arial',
+            fontSize: 18,
         });
-    }
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        e.target.value = ''; // сброс
+    });
 
-    // Запуск при загрузке
-    toggleMode();
+    // Удаление по клавише Delete
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete' && canvas.getActiveObject()) {
+            canvas.remove(canvas.getActiveObject());
+            canvas.renderAll();
+        }
+    });
+
+    // Сохранение JSON холста перед отправкой
+    document.getElementById('noteForm').addEventListener('submit', () => {
+        const canvasJson = JSON.stringify(canvas.toJSON());
+        document.getElementById('canvas-json').value = canvasJson;
+    });
 </script>
 {% endblock %}

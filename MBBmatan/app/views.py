@@ -59,7 +59,7 @@ class NoteListView(LoginRequiredMixin, ListView):
 
 class NoteCreateView(LoginRequiredMixin, CreateView):
     model = Note
-    fields = ["title", "content"]
+    fields = ['title', 'content', 'canvas_data']
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
 
@@ -67,10 +67,9 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
-
 class NoteUpdateView(LoginRequiredMixin, UpdateView):
     model = Note
-    fields = ["title", "content"]
+    fields = ['title', 'content', 'canvas_data']
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
 
