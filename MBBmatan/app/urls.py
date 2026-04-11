@@ -9,6 +9,7 @@ from .views import (
     remove_friend, start_private_chat, user_profile_view, create_group_chat, notification_list, get_hint,
     mark_notification_read, NoteDetailView,
 )
+from .views import ai_chat_fullscreen, ai_chat_api, ai_chat_clear
 
 app_name = "app"
 
@@ -45,4 +46,7 @@ urlpatterns = [
     path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
     path('quiz/hint/', get_hint, name='get_hint'),
     path('notes/<int:pk>/', NoteDetailView.as_view(), name='note_detail'),
+    path('ai-chat/', ai_chat_fullscreen, name='ai_chat_fullscreen'),
+    path('ai-chat/api/', ai_chat_api, name='ai_chat_api'),
+    path('ai-chat/clear/', ai_chat_clear, name='ai_chat_clear'),
 ]

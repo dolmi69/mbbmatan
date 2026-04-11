@@ -14,6 +14,13 @@ import random
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+import json
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from .gigachat_service import GigaChatService
 
 
 class RegisterView(CreateView):
@@ -508,3 +515,40 @@ class NoteDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return Note.objects.filter(user=self.request.user)
+
+@login_required
+def ai_chat_fullscreen(request):
+    service = GigaChatService(request.user)
+    history = service.get_history(limit=50)
+    return render(request, 'ai_chat/fullscreen.html', {
+        'history': history,
+        'session_id': service.session_id
+    })
+
+@login_required
+@csrf_exempt
+@require_POST
+def ai_chat_api(request):
+    try:
+        data = json.loads(request.body)
+        message = data.get('message', '').strip()
+        session_id = data.get('session_id')
+        if not message:
+            return JsonResponse({'success': False, 'error': 'Пустое сообщение'})
+        service = GigaChatService(request.user, session_id)
+        result = service.send_message(message)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@login_required
+@require_POST
+def ai_chat_clear(request):
+    try:
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        service = GigaChatService(request.user, session_id)
+        result = service.clear_history()
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

@@ -313,6 +313,7 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
                     <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
+                    <a href="{% url 'app:ai_chat_fullscreen' %}" class="nav-link"><i class="fas fa-robot"></i> AI-чат</a>
                 {% endif %}
             </div>
 
@@ -398,5 +399,9 @@
 
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
+
+    {% if user.is_authenticated %}
+        {% include 'ai_chat/widget.html' with widget_history=user.aichathistory_set.all|slice:":5" %}
+    {% endif %}
 </body>
 </html>

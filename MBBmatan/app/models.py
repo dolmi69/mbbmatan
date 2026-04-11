@@ -364,3 +364,18 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.text[:50]}"
+
+class AIChatHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    session_id = models.CharField(max_length=100, blank=True)
+    role = models.CharField(max_length=20)  # 'user' или 'assistant'
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'История диалога с AI'
+        verbose_name_plural = 'Истории диалогов с AI'
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}: {self.content[:50]}"

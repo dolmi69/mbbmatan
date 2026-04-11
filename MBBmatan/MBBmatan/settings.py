@@ -14,6 +14,11 @@ from pathlib import Path
 import os
 from django.utils.translation import gettext_lazy as _
 
+
+GIGACHAT_CREDENTIALS = os.environ.get('GIGACHAT_CREDENTIALS', 'MDE5ZDdlMzQtN2UyNy03ODc0LWIzNDAtZTM5ZDA4M2QwNzRhOjBmMTVkM2FiLTBmMGEtNDRkMy05M2RlLTQyODYzMGY4OWQ4Yw==')
+GIGACHAT_VERIFY_SSL = False  # для разработки
+GIGACHAT_MODEL = 'GigaChat'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
