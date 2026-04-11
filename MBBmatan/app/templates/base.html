@@ -341,105 +341,110 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{% url 'app:home' %}" class="logo">
-                <i class="fas fa-calculator"></i> MATAN
-            </a>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'app:home' %}" class="logo">
+            <i class="fas fa-calculator"></i> MATAN
+        </a>
 
-            <div class="nav-menu">
-                <a href="{% url 'app:home' %}" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+        <div class="nav-menu">
+            <a href="{% url 'app:home' %}" class="nav-link"><i class="fas fa-home"></i> Главная</a>
 
-                <div class="dropdown">
-                    <a href="#" class="nav-link"><i class="fas fa-book"></i> Предметы</a>
-                    <div class="dropdown-content">
-                        <a href="{% url 'app:f_f' %}"><i class="fas fa-flask"></i> Физика</a>
-                        <a href="{% url 'app:t_a' %}"><i class="fas fa-square-root-alt"></i> Алгебра</a>
-                        <a href="{% url 'app:t_g' %}"><i class="fas fa-shapes"></i> Геометрия</a>
-                    </div>
+            <div class="dropdown">
+                <a href="#" class="nav-link"><i class="fas fa-book"></i> Предметы</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'app:f_f' %}"><i class="fas fa-flask"></i> Физика</a>
+                    <a href="{% url 'app:t_a' %}"><i class="fas fa-square-root-alt"></i> Алгебра</a>
+                    <a href="{% url 'app:t_g' %}"><i class="fas fa-shapes"></i> Геометрия</a>
                 </div>
-
-                <a href="{% url 'app:formula_quiz' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
-                <a href="{% url 'app:note_list' %}" class="nav-link"><i class="fas fa-sticky-note"></i> Заметки</a>
-
-                {% if user.is_authenticated %}
-                    <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
-                    <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
-                {% endif %}
             </div>
 
-            <div class="user-section">
-                {% if user.is_authenticated %}
-                    <div class="user-profile">
-                        <div class="user-info">
-                            <a href="{% url 'app:profile' %}" class="username">{{ user.username }}</a>
-                            {% if user.profile %}
-                                <span class="level-badge">Ур. {{ user.profile.level }}</span>
-                            {% endif %}
-                        </div>
-                        <div class="user-actions">
-                            <a href="{% url 'app:profile' %}" class="btn-profile"><i class="fas fa-user"></i></a>
-                            <form action="{% url 'app:logout' %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="auth-buttons">
-                        <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</a>
-                        <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> Регистрация</a>
-                    </div>
+            <a href="{% url 'app:formula_quiz' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
+            <a href="{% url 'app:note_list' %}" class="nav-link"><i class="fas fa-sticky-note"></i> Заметки</a>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
+            <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
+            {% endif %}
+        </div>
+        {% if user.is_authenticated %}
+        <div class="user-profile">
+            <div class="user-info">
+                <a href="{% url 'app:profile' %}" class="username">{{ user.username }}</a>
+                {% if user.profile %}
+                <span class="level-badge">Ур. {{ user.profile.level }}</span>
                 {% endif %}
+            </div>
+            <div class="user-actions">
+                <a href="{% url 'app:profile' %}" class="btn-profile"><i class="fas fa-user"></i></a>
+                <a href="{% url 'app:notifications' %}" class="btn-profile" style="position:relative;">
+                    <i class="fas fa-bell"></i>
+                    {% if unread_notifications %}
+                    <span style="position:absolute; top:-5px; right:-5px; background:#e74c3c; color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px;">
+                                {{ unread_notifications }}
+                            </span>
+                    {% endif %}
+                </a>
+                <form action="{% url 'app:logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+                </form>
             </div>
         </div>
-    </nav>
-
-    <main class="main-content">
-        {% if messages %}
-            <div class="messages-container">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags|default:'info' }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
+        {% else %}
+        <div class="auth-buttons">
+            <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</a>
+            <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> Регистрация</a>
+        </div>
         {% endif %}
+    </div>
+</nav>
 
-        {% block content %}
-        {% endblock %}
-    </main>
-
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>MATAN</h3>
-                <p>Платформа для изучения точных наук</p>
-                <p>© {% now "Y" %} Все права защищены</p>
-            </div>
-            <div class="footer-section">
-                <h3>Навигация</h3>
-                <a href="{% url 'app:home' %}">Главная</a>
-                <a href="{% url 'app:f_f' %}">Формулы физики</a>
-                <a href="{% url 'app:t_a' %}">Теория алгебры</a>
-                <a href="{% url 'app:t_g' %}">Геометрия</a>
-                <a href="{% url 'app:formula_quiz' %}">Тесты</a>
-            </div>
-            <div class="footer-section">
-                <h3>Сообщество</h3>
-                <a href="{% url 'app:chat_home' %}">Чаты</a>
-                <a href="{% url 'app:manage_friends' %}">Друзья</a>
-                <a href="{% url 'app:profile' %}">Профиль</a>
-            </div>
-            <div class="footer-section">
-                <h3>Контакты</h3>
-                <p>Email: support@matan.ru</p>
-                <p>Telegram: @matan_support</p>
-            </div>
+<main class="main-content">
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+            {{ message }}
         </div>
-    </footer>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-    <script src="{% static 'js/main.js' %}"></script>
-    {% block extra_js %}{% endblock %}
+    {% block content %}
+    {% endblock %}
+</main>
+
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>MATAN</h3>
+            <p>Платформа для изучения точных наук</p>
+            <p>© {% now "Y" %} Все права защищены</p>
+        </div>
+        <div class="footer-section">
+            <h3>Навигация</h3>
+            <a href="{% url 'app:home' %}">Главная</a>
+            <a href="{% url 'app:f_f' %}">Формулы физики</a>
+            <a href="{% url 'app:t_a' %}">Теория алгебры</a>
+            <a href="{% url 'app:t_g' %}">Геометрия</a>
+            <a href="{% url 'app:formula_quiz' %}">Тесты</a>
+        </div>
+        <div class="footer-section">
+            <h3>Сообщество</h3>
+            <a href="{% url 'app:chat_home' %}">Чаты</a>
+            <a href="{% url 'app:manage_friends' %}">Друзья</a>
+            <a href="{% url 'app:profile' %}">Профиль</a>
+        </div>
+        <div class="footer-section">
+            <h3>Контакты</h3>
+            <p>Email: support@matan.ru</p>
+            <p>Telegram: @matan_support</p>
+        </div>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

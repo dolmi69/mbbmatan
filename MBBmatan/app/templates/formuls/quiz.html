@@ -85,6 +85,7 @@
     }
     .mascot-wrapper {
         margin: 20px 0;
+        cursor: pointer;
     }
     .timer {
         font-size: 24px;
@@ -128,7 +129,9 @@
                 {% endfor %}
             </div>
             <div class="quiz-actions">
-                <button type="submit" name="skip" value="1" class="btn" style="background:#95a5a6; color:white;">Пропустить</button>
+                <button type="submit" name="skip" value="1" class="btn" style="background:#95a5a6; color:white;">
+                    Пропустить
+                </button>
                 <button type="submit" class="btn btn-success">
                     {% if current_number == total_questions %}Завершить{% else %}Далее →{% endif %}
                 </button>
@@ -138,7 +141,7 @@
 
     <div class="mascot-panel">
         <h3>Помощник</h3>
-        <div class="mascot-wrapper">
+        <div class="mascot-wrapper" id="mascotClickable">
             {% if mascot_state == 'thumbs_up' %}
                 {% include 'mascot/thumbs_up.html' %}
             {% elif mascot_state == 'wrong' %}
@@ -147,7 +150,7 @@
                 {% include 'mascot/neutral.html' %}
             {% endif %}
         </div>
-        <p>{{ mascot_message }}</p>
+        <p id="mascotMessage">{{ mascot_message }}</p>
     </div>
 </div>
 {% endblock %}
@@ -161,13 +164,36 @@
 
     let timeLeft = 30;
     const timerEl = document.getElementById('timerDisplay');
+    const form = document.getElementById('quizForm');
+
     const interval = setInterval(() => {
         timeLeft--;
         timerEl.textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(interval);
-            document.getElementById('quizForm').submit();
+            // Если время вышло, отправляем форму (можно с пустым ответом или пропуском)
+            // Создаём скрытое поле, чтобы обозначить пропуск по таймауту
+            const skipInput = document.createElement('input');
+            skipInput.type = 'hidden';
+            skipInput.name = 'skip';
+            skipInput.value = '1';
+            form.appendChild(skipInput);
+            form.submit();
         }
     }, 1000);
+
+    form.addEventListener('submit', function() {
+        clearInterval(interval);
+    });
+
+    document.getElementById('mascotClickable').addEventListener('click', function() {
+        fetch('{% url "app:get_hint" %}')
+            .then(response => response.json())
+            .then(data => {
+                alert(data.hint);
+                // document.getElementById('mascotMessage').textContent = data.hint;
+            })
+            .catch(() => alert('Не удалось получить подсказку'));
+    });
 </script>
 {% endblock %}

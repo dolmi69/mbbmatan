@@ -330,3 +330,27 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username}: {self.text[:50]}"
+
+
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('friend_request', 'Заявка в друзья'),
+        ('friend_accepted', 'Заявка принята'),
+        ('chat_message', 'Новое сообщение'),
+        ('test_completed', 'Тест пройден'),
+        ('achievement', 'Достижение'),
+        ('system', 'Системное'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    text = models.CharField(max_length=255)
+    link = models.CharField(max_length=200, blank=True)
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='system')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.text[:50]}"

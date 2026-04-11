@@ -6,7 +6,8 @@ from .views import (
     chat_home, chat_room, subject_chat, send_message,
     f_f, t_f, t_a, t_g,
     manage_friends, send_friend_request, handle_friend_request,
-    remove_friend, start_private_chat,
+    remove_friend, start_private_chat, user_profile_view, create_group_chat, notification_list, get_hint,
+    mark_notification_read,
 )
 
 app_name = "app"
@@ -38,4 +39,9 @@ urlpatterns = [
     path('friends/<int:request_id>/<str:action>/', handle_friend_request, name='handle_friend_request'),
     path('friends/remove/', remove_friend, name='remove_friend'),
     path('chat/private/<int:user_id>/', start_private_chat, name='start_private_chat'),
+    path('profile/<int:user_id>/', user_profile_view, name='user_profile'),
+    path('chat/group/create/', create_group_chat, name='create_group_chat'),
+    path('notifications/', notification_list, name='notifications'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read, name='mark_notification_read'),
+    path('quiz/hint/', get_hint, name='get_hint'),
 ]

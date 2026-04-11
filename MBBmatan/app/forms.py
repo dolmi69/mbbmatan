@@ -40,3 +40,22 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("username", "email", "password1", "password2")
+
+
+class GroupChatForm(forms.Form):
+    name = forms.CharField(max_length=100, label='Название группы')
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3}),
+        required=False,
+        label='Описание'
+    )
+    friends = forms.ModelMultipleChoiceField(
+        queryset=User.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        label='Выберите друзей'
+    )
+
+    def __init__(self, *args, **kwargs):
+        friends_queryset = kwargs.pop('friends', User.objects.none())
+        super().__init__(*args, **kwargs)
+        self.fields['friends'].queryset = friends_queryset
