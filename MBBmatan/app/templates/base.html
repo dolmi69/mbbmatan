@@ -13,16 +13,20 @@
             box-sizing: border-box;
         }
 
+        /* ----- ГАРАНТИРОВАННЫЙ БЕЖЕВЫЙ ФОН ДЛЯ ВСЕГО САЙТА ----- */
+        html, body {
+            background: #f8f5e6 !important;
+        }
+
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f8f5e6;
             color: #2c3e50;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* ----- ШАПКА (увеличена, ширина 100%) ----- */
+        /* ----- ШАПКА ----- */
         .navbar {
             background: #5a6e7c;
             color: white;
@@ -40,7 +44,7 @@
             justify-content: space-between;
             max-width: 1400px;
             margin: 0 auto;
-            height: 75px;  /* было 70px */
+            height: 75px;
         }
 
         .logo {
@@ -53,14 +57,9 @@
             gap: 8px;
         }
 
-        .logo i {
-            color: #f1c40f;
-        }
+        .logo i { color: #f1c40f; }
 
-        .nav-menu {
-            display: flex;
-            gap: 5px;
-        }
+        .nav-menu { display: flex; gap: 5px; }
 
         .nav-link {
             color: white;
@@ -74,13 +73,9 @@
             font-weight: 500;
         }
 
-        .nav-link:hover {
-            background: rgba(255,255,255,0.15);
-        }
+        .nav-link:hover { background: rgba(255,255,255,0.15); }
 
-        .dropdown {
-            position: relative;
-        }
+        .dropdown { position: relative; }
 
         .dropdown-content {
             display: none;
@@ -94,9 +89,7 @@
             z-index: 1001;
         }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+        .dropdown:hover .dropdown-content { display: block; }
 
         .dropdown-content a {
             color: white;
@@ -106,33 +99,15 @@
             border-radius: 8px;
         }
 
-        .dropdown-content a:hover {
-            background: rgba(255,255,255,0.2);
-        }
+        .dropdown-content a:hover { background: rgba(255,255,255,0.2); }
 
-        .user-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .user-section { display: flex; align-items: center; gap: 15px; }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .user-profile { display: flex; align-items: center; gap: 15px; }
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
+        .user-info { display: flex; flex-direction: column; align-items: flex-end; }
 
-        .username {
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
+        .username { font-weight: bold; color: white; text-decoration: none; }
 
         .level-badge {
             background: #f1c40f;
@@ -143,10 +118,7 @@
             font-weight: bold;
         }
 
-        .user-actions {
-            display: flex;
-            gap: 8px;
-        }
+        .user-actions { display: flex; gap: 8px; }
 
         .btn-profile, .btn-logout {
             background: transparent;
@@ -165,10 +137,7 @@
             border-color: rgba(255,255,255,0.6);
         }
 
-        .auth-buttons {
-            display: flex;
-            gap: 10px;
-        }
+        .auth-buttons { display: flex; gap: 10px; }
 
         .btn-login, .btn-signup {
             padding: 8px 18px;
@@ -189,12 +158,8 @@
             border: none;
         }
 
-        .btn-login:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        .btn-signup:hover {
-            background: #27ae60;
-        }
+        .btn-login:hover { background: rgba(255,255,255,0.2); }
+        .btn-signup:hover { background: #27ae60; }
 
         /* ----- ОСНОВНОЙ КОНТЕНТ ----- */
         .main-content {
@@ -206,9 +171,7 @@
         }
 
         /* ----- СООБЩЕНИЯ ----- */
-        .messages-container {
-            margin-bottom: 25px;
-        }
+        .messages-container { margin-bottom: 25px; }
 
         .alert {
             padding: 16px 20px;
@@ -235,7 +198,7 @@
             border-left: 5px solid #17a2b8;
         }
 
-        /* ----- ФУТЕР (уменьшен, ширина 100%) ----- */
+        /* ----- ФУТЕР ----- */
         .footer {
             background: #5a6e7c;
             color: #ecf0f1;
@@ -266,9 +229,7 @@
             text-decoration: none;
         }
 
-        .footer-section a:hover {
-            text-decoration: underline;
-        }
+        .footer-section a:hover { text-decoration: underline; }
 
         /* ----- АДАПТИВНОСТЬ ----- */
         @media (max-width: 768px) {
@@ -328,7 +289,6 @@
                         </div>
                         <div class="user-actions">
                             <a href="{% url 'app:profile' %}" class="btn-profile"><i class="fas fa-user"></i></a>
-                            <!-- Иконка уведомлений -->
                             <a href="{% url 'app:notifications' %}" class="btn-profile" style="position:relative;">
                                 <i class="fas fa-bell"></i>
                                 {% if unread_notifications %}
@@ -364,8 +324,7 @@
             </div>
         {% endif %}
 
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
