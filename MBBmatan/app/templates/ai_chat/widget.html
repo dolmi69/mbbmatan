@@ -32,15 +32,9 @@
 </div>
 
 <style>
-.ai-chat-widget {
-    position: fixed;
-    bottom: 150px;   /* ← подняли выше (было 20px) */
-    right: 20px;
-    z-index: 9999;
-}
+.ai-chat-widget { position: fixed; bottom: 90px; right: 20px; z-index: 9999; }
 .ai-chat-icon {
-    width: 100px;     /* ← чуть больше */
-    height: 100px;
+    width: 65px; height: 65px;
     background: #5a6e7c;
     border-radius: 50%;
     display: flex;
@@ -52,19 +46,13 @@
     overflow: hidden;
 }
 .ai-chat-icon:hover { transform: scale(1.1); }
-.ai-chat-icon svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-    transform: scale(1.3);
-}
+.ai-chat-icon svg { width: 100%; height: 100%; display: block; object-fit: contain; transform: scale(1.3); }
 .ai-chat-window {
     position: absolute;
-    bottom: 80px;    /* ← расстояние от иконки до окна */
+    bottom: 80px;
     right: 0;
-    width: 400px;    /* ← шире (было 350px) */
-    height: 550px;   /* ← выше (было 500px) */
+    width: 400px;
+    height: 550px;
     background: white;
     border-radius: 15px;
     box-shadow: 0 5px 25px rgba(0,0,0,0.2);
@@ -82,13 +70,7 @@
 }
 .ai-chat-header h3 { margin: 0; font-size: 16px; }
 .ai-chat-actions { display: flex; gap: 10px; }
-.fullscreen-btn, .close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-}
+.fullscreen-btn, .close-btn { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
 .ai-chat-messages {
     flex: 1;
     padding: 15px;
@@ -103,16 +85,8 @@
     border-radius: 15px;
     word-wrap: break-word;
 }
-.message.user {
-    align-self: flex-end;
-    background: #3498db;
-    color: white;
-}
-.message.assistant {
-    align-self: flex-start;
-    background: #f0f0f0;
-    color: #333;
-}
+.message.user { align-self: flex-end; background: #3498db; color: white; }
+.message.assistant { align-self: flex-start; background: #f0f0f0; color: #333; }
 .ai-chat-input {
     padding: 15px;
     border-top: 1px solid #eee;
@@ -138,10 +112,15 @@
     transition: background 0.2s;
 }
 .ai-chat-input button:hover { background: #4a5c6a; }
+
 @media (max-width: 480px) {
+    .ai-chat-widget { bottom: 70px; right: 10px; }
+    .ai-chat-icon { width: 55px; height: 55px; }
     .ai-chat-window {
-        width: calc(100vw - 40px);
+        width: calc(100vw - 20px);
         height: 450px;
+        bottom: 70px;
+        right: 0;
     }
 }
 </style>

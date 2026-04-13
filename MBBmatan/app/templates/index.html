@@ -80,6 +80,21 @@
     .quiz-button:hover {
         background: #d35400;
     }
+
+    /* Мобильная адаптация */
+    @media (max-width: 600px) {
+        .home-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .block {
+            padding: 20px;
+        }
+        .big-button {
+            font-size: 1.1rem;
+            padding: 20px 15px;
+        }
+    }
 </style>
 
 <div class="home-grid">

@@ -42,6 +42,20 @@
         height: auto;
         background: white;
     }
+
+    @media (max-width: 768px) {
+    #fabric-canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+    .toolbar {
+        flex-wrap: wrap;
+    }
+    .toolbar button, .toolbar select {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+    }
 </style>
 
 <div class="form-container">
