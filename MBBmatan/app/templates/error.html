@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Ошибка | MATAN{% endblock %}
+{% block title %}Ошибка {{ error_code }} | MATAN{% endblock %}
 
 {% block content %}
 <style>
@@ -29,8 +29,16 @@
         font-size: 18px;
     }
     .mascot-wrapper {
-        max-width: 200px;
+        width: 400px;
         margin: 0 auto 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mascot-wrapper svg {
+        width: 100%;
+        height: auto;
+        display: block;
     }
 </style>
 
@@ -41,9 +49,9 @@
     <div class="mascot-wrapper">
         {% include 'mascot/wrong.html' %}
     </div>
-    <h2 class="error-title">Упс! Что-то пошло не так</h2>
+    <h2 class="error-title">Ошибка {{ error_code }}</h2>
     <div class="error-message">
-        {{ message|default:"Произошла непредвиденная ошибка." }}
+        {{ message }}
     </div>
     <div style="display: flex; gap: 15px; justify-content: center;">
         <a href="{% url 'app:home' %}" class="btn btn-primary"><i class="fas fa-home"></i> На главную</a>

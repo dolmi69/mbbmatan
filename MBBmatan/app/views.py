@@ -1,27 +1,22 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
-from .forms import RegisterForm, LoginForm, CustomUserCreationForm, GroupChatForm
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+import random
+import json
+
+from .forms import RegisterForm, LoginForm, CustomUserCreationForm, GroupChatForm
 from .models import (
     Note, ChatMessage, ChatRoom, FavoriteFormula, FormulaQuestion,
     TestAttempt, UserProfile, FriendRequest, User, Notification
 )
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-import random
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db.models import Q
-import json
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from .gigachat_service import GigaChatService
-
 
 class RegisterView(CreateView):
     form_class = RegisterForm
@@ -552,3 +547,17 @@ def ai_chat_clear(request):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+def custom_error_view(request, code, exception=None):
+    messages_map = {
+        400: 'Некорректный запрос.',
+        403: 'Доступ запрещён.',
+        404: 'Страница не найдена.',
+        500: 'Внутренняя ошибка сервера. Мы уже работаем над исправлением.',
+    }
+    context = {
+        'message': messages_map.get(code, 'Произошла ошибка.'),
+        'error_code': code,
+    }
+    return render(request, 'error.html', context, status=code)

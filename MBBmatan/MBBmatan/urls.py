@@ -1,23 +1,13 @@
-"""
-URL configuration for MBBmatan project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
+from app.views import custom_error_view
+
+handler404 = lambda request, exception: custom_error_view(request, 404, exception)
+handler500 = lambda request: custom_error_view(request, 500)
+handler403 = lambda request, exception: custom_error_view(request, 403, exception)
+handler400 = lambda request, exception: custom_error_view(request, 400, exception)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('app.urls', namespace='app')),
+    path('', include('app.urls')),
 ]

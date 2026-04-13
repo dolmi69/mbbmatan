@@ -7,9 +7,8 @@ from .views import (
     f_f, t_f, t_a, t_g,
     manage_friends, send_friend_request, handle_friend_request,
     remove_friend, start_private_chat, user_profile_view, create_group_chat, notification_list, get_hint,
-    mark_notification_read, NoteDetailView,
+    mark_notification_read, NoteDetailView, ai_chat_fullscreen, ai_chat_api, ai_chat_clear
 )
-from .views import ai_chat_fullscreen, ai_chat_api, ai_chat_clear
 
 app_name = "app"
 
