@@ -308,7 +308,7 @@
                     </div>
                 </div>
 
-                <a href="{% url 'app:formula_quiz' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
+                <a href="{% url 'app:test_choice' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
                 <a href="{% url 'app:note_list' %}" class="nav-link"><i class="fas fa-sticky-note"></i> Заметки</a>
 
                 {% if user.is_authenticated %}
@@ -380,7 +380,7 @@
                 <a href="{% url 'app:f_f' %}">Формулы физики</a>
                 <a href="{% url 'app:t_a' %}">Теория алгебры</a>
                 <a href="{% url 'app:t_g' %}">Геометрия</a>
-                <a href="{% url 'app:formula_quiz' %}">Тесты</a>
+                <a href="{% url 'app:test_choice' %}" class="nav-link"><i class="fas fa-brain"></i> Тесты</a>
             </div>
             <div class="footer-section">
                 <h3>Сообщество</h3>
@@ -390,7 +390,6 @@
             </div>
             <div class="footer-section">
                 <h3>Контакты</h3>
-                <p>Email: support@matan.ru</p>
                 <p>Telegram: @matan_support</p>
             </div>
         </div>

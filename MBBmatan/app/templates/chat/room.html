@@ -20,10 +20,7 @@
         background: #f8f9fa;
         border-bottom: 1px solid #dee2e6;
     }
-    .chat-header h2 {
-        margin: 0;
-        color: #2c3e50;
-    }
+    .chat-header h2 { margin: 0; color: #2c3e50; }
     .messages-container {
         flex: 1;
         overflow-y: auto;
@@ -38,7 +35,6 @@
         border-radius: 18px;
         background: #ecf0f1;
         align-self: flex-start;
-        position: relative;
     }
     .own-message {
         background: #3498db;
@@ -52,15 +48,8 @@
         color: inherit;
         text-decoration: none;
     }
-    .message-sender:hover {
-        text-decoration: underline;
-    }
-    .message-time {
-        font-size: 11px;
-        opacity: 0.7;
-        margin-top: 5px;
-        text-align: right;
-    }
+    .message-sender:hover { text-decoration: underline; }
+    .message-time { font-size: 11px; opacity: 0.7; margin-top: 5px; text-align: right; }
     .reply-preview {
         background: rgba(0,0,0,0.05);
         padding: 8px 12px;
@@ -120,78 +109,93 @@
         {% endfor %}
     </div>
 
-    {% if user.is_authenticated %}
     <div class="message-input-area">
-        <form id="messageForm">
-            {% csrf_token %}
-            <div class="reply-indicator" id="replyIndicator" style="display:none;">
-                <span>↩️ Ответ <span id="replyUsername"></span></span>
-                <button type="button" id="cancelReply" style="background:none;border:none;color:#e74c3c;cursor:pointer;">✕</button>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="messageInput" placeholder="Введите сообщение..." style="flex:1; padding:12px 15px; border:1px solid #ddd; border-radius:30px;">
-                <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i> Отправить</button>
-            </div>
-        </form>
+        <div class="reply-indicator" id="replyIndicator" style="display:none;">
+            <span>↩️ Ответ <span id="replyUsername"></span></span>
+            <button type="button" id="cancelReply" style="background:none;border:none;color:#e74c3c;cursor:pointer;">✕</button>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="messageInput" placeholder="Введите сообщение..." style="flex:1; padding:12px 15px; border:1px solid #ddd; border-radius:30px;">
+            <button type="button" class="btn-send" id="sendButton"><i class="fas fa-paper-plane"></i> Отправить</button>
+        </div>
     </div>
-    {% else %}
-    <div style="padding:20px; text-align:center;">
-        <a href="{% url 'app:login' %}" class="btn btn-primary">Войдите, чтобы писать сообщения</a>
-    </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     const roomId = {{ room.id }};
-    const sendUrl = "{% url 'app:send_message' room.id %}";
+    const currentUser = "{{ user.username }}";
     let replyToId = null;
-    const messageInput = document.getElementById('messageInput');
-    const replyIndicator = document.getElementById('replyIndicator');
-    const replyUsernameSpan = document.getElementById('replyUsername');
 
-    document.querySelectorAll('.message').forEach(msgDiv => {
-        msgDiv.addEventListener('click', function(e) {
+    const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomId}/`);
+
+    socket.onopen = () => console.log('WebSocket connected');
+    socket.onclose = () => console.log('WebSocket closed');
+
+    socket.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        addMessageElement(data, data.sender === currentUser);
+    };
+
+    function addMessageElement(data, own) {
+        const container = document.getElementById('messagesContainer');
+        const emptyMsg = container.querySelector('p');
+        if (emptyMsg) emptyMsg.remove();
+
+        const div = document.createElement('div');
+        div.className = `message ${own ? 'own-message' : ''}`;
+        div.id = `msg-${data.id}`;
+
+        let replyHtml = '';
+        if (data.reply_to) {
+            replyHtml = `<div class="reply-preview"><i class="fas fa-reply"></i> ${data.reply_to.sender}: ${data.reply_to.message}</div>`;
+        }
+
+        div.innerHTML = `
+            ${replyHtml}
+            <a href="/profile/${data.sender}/" class="message-sender">${data.sender}</a>
+            <div>${escapeHtml(data.message).replace(/\n/g, '<br>')}</div>
+            <div class="message-time">${data.timestamp}</div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    document.getElementById('sendButton').addEventListener('click', () => {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        if (!message) return;
+        socket.send(JSON.stringify({
+            message: message,
+            reply_to: replyToId
+        }));
+        input.value = '';
+        replyToId = null;
+        document.getElementById('replyIndicator').style.display = 'none';
+    });
+
+    document.querySelectorAll('.message').forEach(msg => {
+        msg.addEventListener('click', function(e) {
             if (e.target.closest('a')) return;
             const sender = this.querySelector('.message-sender').textContent;
             const msgId = this.id.replace('msg-', '');
-            replyToId = msgId;
-            replyUsernameSpan.textContent = sender;
-            replyIndicator.style.display = 'flex';
-            messageInput.focus();
+            replyToId = parseInt(msgId);
+            document.getElementById('replyUsername').textContent = sender;
+            document.getElementById('replyIndicator').style.display = 'flex';
+            document.getElementById('messageInput').focus();
         });
     });
 
-    document.getElementById('cancelReply').addEventListener('click', function() {
+    document.getElementById('cancelReply').addEventListener('click', () => {
         replyToId = null;
-        replyIndicator.style.display = 'none';
+        document.getElementById('replyIndicator').style.display = 'none';
     });
-
-    document.getElementById('messageForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const text = messageInput.value.trim();
-        if (!text) return;
-
-        const formData = new FormData();
-        formData.append('message', text);
-        if (replyToId) formData.append('reply_to', replyToId);
-
-        fetch(sendUrl, {
-            method: 'POST',
-            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
-            body: formData
-        }).then(res => res.json()).then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.error || 'Ошибка');
-            }
-        });
-    });
-
-    // Автопрокрутка вниз
-    const container = document.getElementById('messagesContainer');
-    container.scrollTop = container.scrollHeight;
 </script>
 {% endblock %}

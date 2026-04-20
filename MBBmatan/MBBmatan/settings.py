@@ -19,24 +19,17 @@ GIGACHAT_CREDENTIALS = os.environ.get('GIGACHAT_CREDENTIALS', 'MDE5ZDdlMzQtN2UyN
 GIGACHAT_VERIFY_SSL = False  # для разработки
 GIGACHAT_MODEL = 'GigaChat'
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-4*u3)xww1h6b_lcj(ipvi85($k^1+ca18r8_^tp#d3c32te%^g'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']   # '*' только для теста
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
 
-
-# Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # Для разработки
+    },
+}
+
+ASGI_APPLICATION = 'MBBmatan.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

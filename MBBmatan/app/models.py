@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
 from django.db import transaction
-from .encryption import encrypt_message, decrypt_message
 import markdown
+from .encryption import encrypt_message, decrypt_message
 
 User = get_user_model()
 
@@ -13,9 +13,9 @@ User = get_user_model()
 class Note(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=200, blank=True)
-    content = models.TextField(blank=True)          # Markdown текст
-    canvas_data = models.TextField(blank=True)      # JSON холста
-    content_html = models.TextField(blank=True)     # рендеренный Markdown
+    content = models.TextField(blank=True)
+    canvas_data = models.TextField(blank=True)
+    content_html = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -29,6 +29,9 @@ class Note(models.Model):
             self.content_html = ''
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.title or f"Заметка #{self.id}"
+
 
 class FavoriteFormula(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -40,6 +43,12 @@ class FavoriteFormula(models.Model):
 
 
 class FormulaQuestion(models.Model):
+    SUBJECTS = [
+        ('physics', 'Физика'),
+        ('algebra', 'Алгебра'),
+        ('geometry', 'Геометрия'),
+    ]
+    subject = models.CharField(max_length=20, choices=SUBJECTS, default='physics')
     formula = models.CharField("Вопрос", max_length=200)
     correct_answer = models.CharField("Правильный ответ", max_length=200)
     options = models.JSONField("Варианты ответов", default=list)
@@ -61,19 +70,15 @@ class TestAttempt(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-
     level = models.IntegerField(default=1)
     experience = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
-
     total_questions_answered = models.IntegerField(default=0)
     correct_answers = models.IntegerField(default=0)
     total_formulas_studied = models.IntegerField(default=0)
     tests_completed = models.IntegerField(default=0)
-
     friends = models.ManyToManyField('self', symmetrical=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-
     show_statistics = models.BooleanField(default=True)
     notifications_enabled = models.BooleanField(default=True)
 
@@ -94,11 +99,9 @@ class UserProfile(models.Model):
         self.total_questions_answered += total_questions
         self.correct_answers += correct_answers
         self.tests_completed += 1
-
         experience_gained = correct_answers * 10
         if correct_answers == total_questions:
             experience_gained += 50
-
         self.add_experience(experience_gained)
         self.save()
 
@@ -128,7 +131,6 @@ class ChatRoom(models.Model):
         ('private', 'Приватный'),
         ('group', 'Групповой'),
     ]
-
     name = models.CharField(max_length=100)
     room_type = models.CharField(max_length=20, choices=ROOM_TYPES, default='general')
     description = models.TextField(blank=True)
@@ -140,55 +142,28 @@ class ChatRoom(models.Model):
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
 
-    def get_last_message(self):
-        return self.messages.order_by('-timestamp').first()
-
-    def get_unread_count(self, user):
-        return self.messages.filter(is_read=False).exclude(sender=user).count()
-
     @classmethod
     def get_or_create_general_chats(cls):
         general_chats = [
-            {
-                'name': 'Общий чат по физике',
-                'room_type': 'physics',
-                'description': 'Обсуждение формул и законов физики'
-            },
-            {
-                'name': 'Общий чат по алгебре',
-                'room_type': 'algebra',
-                'description': 'Обсуждение алгебраических выражений и уравнений'
-            },
-            {
-                'name': 'Общий чат по геометрии',
-                'room_type': 'geometry',
-                'description': 'Обсуждение геометрических фигур и теорем'
-            },
+            {'name': 'Общий чат по физике', 'room_type': 'physics', 'description': 'Обсуждение формул и законов физики'},
+            {'name': 'Общий чат по алгебре', 'room_type': 'algebra', 'description': 'Обсуждение алгебраических выражений и уравнений'},
+            {'name': 'Общий чат по геометрии', 'room_type': 'geometry', 'description': 'Обсуждение геометрических фигур и теорем'},
         ]
-
         for chat_data in general_chats:
             cls.objects.get_or_create(
                 name=chat_data['name'],
                 room_type=chat_data['room_type'],
-                defaults={
-                    'description': chat_data['description'],
-                    'is_active': True
-                }
+                defaults={'description': chat_data['description'], 'is_active': True}
             )
 
+
 class ChatMessage(models.Model):
-    room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE, related_name='messages')
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     _message = models.TextField(db_column='message')
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-    reply_to = models.ForeignKey(
-        'self',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='replies'
-    )
+    reply_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
 
     @property
     def message(self):
@@ -198,6 +173,9 @@ class ChatMessage(models.Model):
     def message(self, value):
         self._message = encrypt_message(value)
 
+    class Meta:
+        ordering = ['timestamp']
+
     def __str__(self):
         try:
             preview = self.message[:30] + '...' if len(self.message) > 30 else self.message
@@ -205,103 +183,19 @@ class ChatMessage(models.Model):
             preview = '***'
         return f"{self.sender.username}: {preview}"
 
-    class Meta:
-        ordering = ['timestamp']
-
-@receiver(post_migrate)
-def create_initial_data(sender, **kwargs):
-    if hasattr(sender, 'name') and sender.name == 'app':
-        try:
-            initial_questions = [
-                {
-                    "formula": "Какая формула выражает закон Архимеда?",
-                    "correct_answer": "F = ρ·g·V",
-                    "options": ["F = m·a", "F = ρ·g·V", "P = F/S", "v = s/t"]
-                },
-                {
-                    "formula": "Как называется единица измерения силы?",
-                    "correct_answer": "Ньютон",
-                    "options": ["Паскаль", "Джоуль", "Ньютон", "Ватт"]
-                },
-                {
-                    "formula": "Формула для вычисления площади круга?",
-                    "correct_answer": "S = π·r²",
-                    "options": ["S = a·b", "S = π·r²", "S = ½·a·h", "S = a²"]
-                },
-                {
-                    "formula": "Формула теоремы Пифагора?",
-                    "correct_answer": "a² + b² = c²",
-                    "options": ["E = mc²", "a² + b² = c²", "V = S·h", "F = G·(m₁·m₂)/r²"]
-                },
-                {
-                    "formula": "Формула для вычисления скорости?",
-                    "correct_answer": "v = s/t",
-                    "options": ["v = s·t", "v = s/t", "v = a·t", "v = √(2gh)"]
-                },
-                {
-                    "formula": "Формула для вычисления работы?",
-                    "correct_answer": "A = F·s",
-                    "options": ["A = F·s", "A = m·g·h", "A = P·t", "A = ½·m·v²"]
-                },
-                {
-                    "formula": "Формула для вычисления мощности?",
-                    "correct_answer": "P = A/t",
-                    "options": ["P = F·v", "P = A/t", "P = U·I", "P = m·g"]
-                },
-            ]
-
-            with transaction.atomic():
-                for q in initial_questions:
-                    FormulaQuestion.objects.get_or_create(
-                        formula=q['formula'],
-                        defaults={
-                            'correct_answer': q['correct_answer'],
-                            'options': q['options']
-                        }
-                    )
-
-            ChatRoom.get_or_create_general_chats()
-
-        except Exception as e:
-            print(f"Error creating initial data: {e}")
-
 
 class FriendRequest(models.Model):
-    from_user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='sent_requests'
-    )
-    to_user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='received_requests'
-    )
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_requests')
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('pending', 'Ожидание'),
-            ('accepted', 'Принята'),
-            ('rejected', 'Отклонена'),
-        ],
-        default='pending'
-    )
+    status = models.CharField(max_length=20, choices=[('pending', 'Ожидание'), ('accepted', 'Принята'), ('rejected', 'Отклонена')], default='pending')
 
     class Meta:
         unique_together = ['from_user', 'to_user']
         ordering = ['-created_at']
 
-    def __str__(self):
-        return f"{self.from_user} → {self.to_user} ({self.status})"
-
     def accept(self):
         if self.status == 'pending':
-            if not hasattr(self.from_user, 'profile'):
-                UserProfile.objects.create(user=self.from_user)
-            if not hasattr(self.to_user, 'profile'):
-                UserProfile.objects.create(user=self.to_user)
-
             self.from_user.profile.friends.add(self.to_user.profile)
             self.to_user.profile.friends.add(self.from_user.profile)
             self.status = 'accepted'
@@ -317,7 +211,6 @@ class FriendRequest(models.Model):
         return False
 
 
-
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
         ('friend_request', 'Заявка в друзья'),
@@ -327,7 +220,6 @@ class Notification(models.Model):
         ('achievement', 'Достижение'),
         ('system', 'Системное'),
     ]
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
     text = models.CharField(max_length=255)
     link = models.CharField(max_length=200, blank=True)
@@ -338,37 +230,11 @@ class Notification(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-    def __str__(self):
-        return f"{self.user.username}: {self.text[:50]}"
-
-
-class Notification(models.Model):
-    NOTIFICATION_TYPES = [
-        ('friend_request', 'Заявка в друзья'),
-        ('friend_accepted', 'Заявка принята'),
-        ('chat_message', 'Новое сообщение'),
-        ('test_completed', 'Тест пройден'),
-        ('achievement', 'Достижение'),
-        ('system', 'Системное'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
-    text = models.CharField(max_length=255)
-    link = models.CharField(max_length=200, blank=True)
-    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='system')
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username}: {self.text[:50]}"
 
 class AIChatHistory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     session_id = models.CharField(max_length=100, blank=True)
-    role = models.CharField(max_length=20)  # 'user' или 'assistant'
+    role = models.CharField(max_length=20)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -377,5 +243,36 @@ class AIChatHistory(models.Model):
         verbose_name = 'История диалога с AI'
         verbose_name_plural = 'Истории диалогов с AI'
 
-    def __str__(self):
-        return f"{self.user.username} - {self.role}: {self.content[:50]}"
+
+# Сигнал для добавления 5 вопросов по каждому предмету при миграциях
+@receiver(post_migrate)
+def create_default_questions(sender, **kwargs):
+    if sender.name == 'app':
+        if not FormulaQuestion.objects.exists():
+            questions_data = [
+                # Физика
+                ('physics', 'Закон Ома?', 'I = U/R', ['I = U*R', 'I = U/R', 'U = I*R', 'R = U*I']),
+                ('physics', 'Формула кинетической энергии?', 'E = mv²/2', ['E = mv', 'E = mv²/2', 'E = mgh', 'E = Fs']),
+                ('physics', 'Второй закон Ньютона?', 'F = ma', ['F = mv', 'F = ma', 'F = m/a', 'F = a/m']),
+                ('physics', 'Закон всемирного тяготения?', 'F = G·m₁·m₂/r²', ['F = G·m₁·m₂/r', 'F = G·m₁·m₂/r²', 'F = G·r²/m₁·m₂', 'F = m₁·m₂/G·r²']),
+                ('physics', 'Первый закон Ньютона?', 'Тело покоится или движется равномерно', ['Тело ускоряется', 'Тело покоится или движется равномерно', 'Тело движется с ускорением', 'На тело действует сила']),
+                # Алгебра
+                ('algebra', 'Дискриминант квадратного уравнения?', 'D = b² - 4ac', ['D = b² + 4ac', 'D = 4ac - b²', 'D = b² - 4ac', 'D = (b² - 4ac)/2a']),
+                ('algebra', 'Квадрат суммы?', '(a+b)² = a² + 2ab + b²', ['(a+b)² = a² + b²', '(a+b)² = a² + 2ab + b²', '(a+b)² = a² - 2ab + b²', '(a+b)² = a² + ab + b²']),
+                ('algebra', 'Разность квадратов?', 'a² - b² = (a-b)(a+b)', ['a² - b² = (a+b)²', 'a² - b² = (a-b)²', 'a² - b² = (a-b)(a+b)', 'a² - b² = a² - 2ab + b²']),
+                ('algebra', 'Теорема Виета для x²+px+q=0?', 'x₁+x₂ = -p, x₁·x₂ = q', ['x₁+x₂ = p, x₁·x₂ = q', 'x₁+x₂ = -p, x₁·x₂ = -q', 'x₁+x₂ = -p, x₁·x₂ = q', 'x₁+x₂ = p, x₁·x₂ = -q']),
+                ('algebra', 'Степень числа aᵐ·aⁿ?', 'a^(m+n)', ['a^(m-n)', 'a^(m+n)', 'a^(m·n)', 'a^(m/n)']),
+                # Геометрия
+                ('geometry', 'Площадь круга?', 'S = πr²', ['S = 2πr', 'S = πr²', 'S = πd', 'S = πr²/2']),
+                ('geometry', 'Теорема Пифагора?', 'c² = a² + b²', ['c = a + b', 'c² = a² - b²', 'c² = a² + b²', 'a² = b² + c²']),
+                ('geometry', 'Площадь треугольника?', 'S = ½·a·h', ['S = a·h', 'S = ½·a·h', 'S = a·b', 'S = a·b·sinγ']),
+                ('geometry', 'Сумма углов треугольника?', '180°', ['90°', '180°', '360°', '270°']),
+                ('geometry', 'Периметр прямоугольника?', 'P = 2(a+b)', ['P = a·b', 'P = 2(a+b)', 'P = a+b', 'P = 4a']),
+            ]
+            for subject, formula, correct, options in questions_data:
+                FormulaQuestion.objects.create(
+                    subject=subject,
+                    formula=formula,
+                    correct_answer=correct,
+                    options=options
+                )

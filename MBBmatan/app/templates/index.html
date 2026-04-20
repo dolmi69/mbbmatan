@@ -19,9 +19,7 @@
         display: flex;
         flex-direction: column;
     }
-    .block:hover {
-        transform: translateY(-5px);
-    }
+    .block:hover { transform: translateY(-5px); }
     .block h2 {
         font-size: 1.8rem;
         margin-bottom: 20px;
@@ -29,18 +27,13 @@
         border-bottom: 2px solid #ecf0f1;
         padding-bottom: 10px;
     }
-    .block h2 i {
-        margin-right: 10px;
-        color: #5a6e7c;
-    }
+    .block h2 i { margin-right: 10px; color: #5a6e7c; }
     .block ul {
         list-style: none;
         padding: 0;
         flex-grow: 1;
     }
-    .block li {
-        margin: 12px 0;
-    }
+    .block li { margin: 12px 0; }
     .block li a {
         text-decoration: none;
         color: #3498db;
@@ -50,14 +43,11 @@
         border-radius: 8px;
         transition: background 0.2s;
     }
-    .block li a:hover {
-        background: #f0f7fc;
-    }
+    .block li a:hover { background: #f0f7fc; }
     .big-button {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #9b59b6;
         color: white;
         text-decoration: none;
         font-size: 1.3rem;
@@ -67,33 +57,21 @@
         transition: background 0.3s;
         text-align: center;
     }
-    .big-button i {
-        margin-right: 10px;
-        font-size: 1.8rem;
-    }
-    .big-button:hover {
-        background: #8e44ad;
-    }
-    .quiz-button {
-        background: #e67e22;
-    }
-    .quiz-button:hover {
-        background: #d35400;
-    }
+    .big-button i { margin-right: 10px; font-size: 1.8rem; }
 
-    /* Мобильная адаптация */
+    .quiz-button-physics { background: #3498db; }
+    .quiz-button-physics:hover { background: #2980b9; }
+    .quiz-button-algebra { background: #e67e22; }
+    .quiz-button-algebra:hover { background: #d35400; }
+    .quiz-button-geometry { background: #2ecc71; }
+    .quiz-button-geometry:hover { background: #27ae60; }
+    .notes-button { background: #9b59b6; }
+    .notes-button:hover { background: #8e44ad; }
+
     @media (max-width: 600px) {
-        .home-grid {
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        .block {
-            padding: 20px;
-        }
-        .big-button {
-            font-size: 1.1rem;
-            padding: 20px 15px;
-        }
+        .home-grid { grid-template-columns: 1fr; gap: 15px; }
+        .block { padding: 20px; }
+        .big-button { font-size: 1.1rem; padding: 20px 15px; }
     }
 </style>
 
@@ -102,8 +80,8 @@
         <h2><i class="fas fa-flask"></i> Формулы</h2>
         <ul>
             <li><a href="{% url 'app:f_f' %}"><i class="fas fa-atom"></i> Физика</a></li>
-            <li><a href="{% url 'app:t_a' %}"><i class="fas fa-superscript"></i> Алгебра</a></li>
-            <li><a href="{% url 'app:t_g' %}"><i class="fas fa-draw-polygon"></i> Геометрия</a></li>
+            <li><a href="{% url 'app:f_a' %}"><i class="fas fa-superscript"></i> Алгебра</a></li>
+            <li><a href="{% url 'app:f_g' %}"><i class="fas fa-draw-polygon"></i> Геометрия</a></li>
         </ul>
     </section>
 
@@ -129,12 +107,18 @@
         {% endif %}
     </section>
 
-    <a href="{% url 'app:formula_quiz' %}" class="big-button quiz-button">
-        <i class="fas fa-play-circle"></i> Начать тест
+    <a href="{% url 'app:note_list' %}" class="big-button notes-button">
+        <i class="fas fa-book"></i> Мои конспекты
     </a>
 
-    <a href="{% url 'app:note_list' %}" class="big-button">
-        <i class="fas fa-book"></i> Мои заметки
+    <a href="{% url 'app:formula_quiz' %}?subject=physics" class="big-button quiz-button-physics">
+        <i class="fas fa-atom"></i> Тест по физике
+    </a>
+    <a href="{% url 'app:formula_quiz' %}?subject=algebra" class="big-button quiz-button-algebra">
+        <i class="fas fa-square-root-alt"></i> Тест по алгебре
+    </a>
+    <a href="{% url 'app:formula_quiz' %}?subject=geometry" class="big-button quiz-button-geometry">
+        <i class="fas fa-shapes"></i> Тест по геометрии
     </a>
 </div>
 {% endblock %}

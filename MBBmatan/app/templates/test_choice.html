@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Выбор теста | MATAN{% endblock %}
+
+{% block content %}
+<style>
+    .test-choice-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    .test-choice-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+    .test-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        text-align: center;
+        transition: transform 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+    .test-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    .test-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+    .test-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    .test-desc {
+        color: #666;
+        margin-bottom: 25px;
+    }
+    .btn-start {
+        background: #2ecc71;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        transition: background 0.2s;
+    }
+    .btn-start:hover { background: #27ae60; }
+    .physics-card .test-icon { color: #3498db; }
+    .algebra-card .test-icon { color: #e67e22; }
+    .geometry-card .test-icon { color: #2ecc71; }
+</style>
+
+<div class="test-choice-container">
+    <h1 style="text-align: center;">Выберите предмет для тестирования</h1>
+    <div class="test-choice-grid">
+        <a href="{% url 'app:formula_quiz' %}?subject=physics" class="test-card physics-card">
+            <div class="test-icon"><i class="fas fa-atom"></i></div>
+            <div class="test-title">Физика</div>
+            <div class="test-desc">Законы, формулы, явления</div>
+            <span class="btn-start">Начать тест</span>
+        </a>
+        <a href="{% url 'app:formula_quiz' %}?subject=algebra" class="test-card algebra-card">
+            <div class="test-icon"><i class="fas fa-square-root-alt"></i></div>
+            <div class="test-title">Алгебра</div>
+            <div class="test-desc">Уравнения, функции, выражения</div>
+            <span class="btn-start">Начать тест</span>
+        </a>
+        <a href="{% url 'app:formula_quiz' %}?subject=geometry" class="test-card geometry-card">
+            <div class="test-icon"><i class="fas fa-shapes"></i></div>
+            <div class="test-title">Геометрия</div>
+            <div class="test-desc">Фигуры, теоремы, построения</div>
+            <span class="btn-start">Начать тест</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
