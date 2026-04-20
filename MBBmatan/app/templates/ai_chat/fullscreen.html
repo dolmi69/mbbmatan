@@ -78,6 +78,24 @@
         padding: 8px 15px;
         border-radius: 20px;
         cursor: pointer;
+        white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+        .chat-fullscreen {
+            height: calc(100vh - 130px);
+            min-height: 0;
+            margin: 12px;
+            border-radius: 14px;
+        }
+        .chat-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+        .chat-header h2 { font-size: 16px; }
+        .chat-messages { padding: 14px; gap: 10px; }
+        .message { max-width: 88%; padding: 10px 14px; font-size: 15px; }
+        .chat-input { padding: 12px; gap: 8px; }
+        .chat-input textarea { padding: 10px 14px; font-size: 15px; }
+        .chat-input button { padding: 10px 14px; }
+        .chat-input button span { display: none; }
+        .btn-clear { padding: 6px 10px; font-size: 13px; }
     }
 </style>
 {% endblock %}

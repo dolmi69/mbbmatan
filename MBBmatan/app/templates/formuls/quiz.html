@@ -84,8 +84,9 @@
         justify-content: space-between;
     }
     .mascot-wrapper {
-        margin: 20px 0;
+        margin: 20px auto;
         cursor: pointer;
+        max-width: 200px;
     }
     .timer {
         font-size: 24px;
@@ -96,15 +97,18 @@
 
     /* Адаптация */
     @media (max-width: 768px) {
-        .quiz-wrapper {
-            flex-direction: column;
-        }
-        .options-grid {
-            grid-template-columns: 1fr;
-        }
-        .question-text {
-            font-size: 22px;
-        }
+        .quiz-wrapper { flex-direction: column; gap: 15px; }
+        .question-panel, .mascot-panel { padding: 20px; border-radius: 14px; }
+        .options-grid { grid-template-columns: 1fr; gap: 10px; }
+        .option-content { padding: 14px; font-size: 16px; }
+        .question-text { font-size: 20px; margin-bottom: 20px; }
+        .progress-block { padding: 14px; margin-bottom: 20px; }
+        .timer { font-size: 20px; }
+        .quiz-actions { flex-direction: column-reverse; gap: 10px; }
+        .quiz-actions .btn { width: 100%; }
+    }
+    @media (max-width: 420px) {
+        .question-text { font-size: 18px; }
     }
 </style>
 {% endblock %}

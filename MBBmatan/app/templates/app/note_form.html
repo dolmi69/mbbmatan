@@ -44,17 +44,17 @@
     }
 
     @media (max-width: 768px) {
-    #fabric-canvas {
-        width: 100% !important;
-        height: auto !important;
+        .form-container { padding: 18px; margin: 15px; border-radius: 14px; }
+        .form-container h2 { font-size: 20px; }
+        .toolbar button, .toolbar select {
+            font-size: 13px;
+            padding: 6px 10px;
+        }
+        #formula-select { margin-left: 0 !important; width: 100%; }
     }
-    .toolbar {
-        flex-wrap: wrap;
-    }
-    .toolbar button, .toolbar select {
-        font-size: 14px;
-        padding: 6px 10px;
-    }
+    @media (max-width: 480px) {
+        .form-container div[style*="justify-content:flex-end"] { flex-direction: column; }
+        .form-container div[style*="justify-content:flex-end"] .btn { width: 100%; }
     }
 </style>
 
@@ -115,8 +115,17 @@
     // Инициализация Fabric.js
     const canvasEl = document.getElementById('fabric-canvas');
     const canvas = new fabric.Canvas('fabric-canvas');
-    canvas.setWidth(800);
-    canvas.setHeight(500);
+    function fitCanvas() {
+        const parent = canvasEl.parentElement;
+        const maxWidth = Math.min(parent.clientWidth, 800);
+        const ratio = 500 / 800;
+        const newWidth = Math.max(300, maxWidth);
+        canvas.setWidth(newWidth);
+        canvas.setHeight(Math.round(newWidth * ratio));
+        canvas.renderAll();
+    }
+    fitCanvas();
+    window.addEventListener('resize', fitCanvas);
 
     // Загрузка сохранённых данных холста
     const jsonData = document.getElementById('canvas-json').value;

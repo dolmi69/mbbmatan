@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
+{% load l10n %}
 
 {% block title %}Профиль {{ user.username }} | MATAN{% endblock %}
 
@@ -77,7 +78,20 @@
     @media (max-width: 768px) {
         .profile-container {
             grid-template-columns: 1fr;
+            gap: 18px;
         }
+        .profile-sidebar, .profile-main { padding: 20px; border-radius: 14px; }
+        .avatar-large { font-size: 60px; }
+        .stat-grid { gap: 10px; }
+        .stat-value { font-size: 22px; }
+        .chart-container { height: 200px; }
+    }
+    @media (max-width: 480px) {
+        .stat-grid { grid-template-columns: 1fr 1fr; }
+        .stat-card { padding: 10px; }
+        .profile-sidebar h2 { font-size: 20px; }
+        .favorites-list li { padding: 8px; font-size: 14px; }
+        table th, table td { font-size: 13px; padding: 8px !important; }
     }
 </style>
 
@@ -86,8 +100,8 @@
         <div class="avatar-large">
             <i class="fas fa-user-circle"></i>
         </div>
-        <h2>{{ user.username }}</h2>
-        <span class="level-badge" style="font-size: 16px; padding: 5px 15px;">Уровень {{ user.profile.level }}</span>
+        <h2 style="margin-bottom: 12px;">{{ user.username }}</h2>
+        <span class="level-badge" style="font-size: 16px; padding: 5px 15px; display: inline-block;">Уровень {{ user.profile.level }}</span>
         <div class="xp-bar-container">
             {% with exp_needed=user.profile.level|multiply:100 %}
             {% with exp_percent=user.profile.experience|div:exp_needed|multiply:100 %}
@@ -152,9 +166,7 @@
             {% for attempt in attempts %}
             <tr>
                 <td style="padding:10px;">{{ attempt.date|date:"d.m.Y H:i" }}</td>
-                <td style="padding:10px; text-align:center;">{{ attempt.correct_answers }}/{{ attempt.total_questions
-                    }}
-                </td>
+                <td style="padding:10px; text-align:center;">{{ attempt.correct_answers }}/{{ attempt.total_questions }}</td>
                 <td style="padding:10px; text-align:center; font-weight:bold; color:{% if attempt.success_percent >= 70 %}#27ae60{% elif attempt.success_percent >= 40 %}#f39c12{% else %}#e74c3c{% endif %};">
                     {{ attempt.success_percent }}%
                 </td>
@@ -170,15 +182,16 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% localize off %}
 <script>
     const ctx = document.getElementById('progressChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [{% for a in attempts %}'{{ a.date|date:"d.m" }}',{% endfor %}],
+            labels: [{% for a in attempts reversed %}'{{ a.date|date:"d.m" }}',{% endfor %}],
             datasets: [{
                 label: 'Успеваемость (%)',
-                data: [{% for a in attempts %}{{ a.success_percent }},{% endfor %}],
+                data: [{% for a in attempts reversed %}{{ a.success_percent }},{% endfor %}],
                 borderColor: '#2ecc71',
                 backgroundColor: 'rgba(46, 204, 113, 0.1)',
                 tension: 0.2,
@@ -197,4 +210,5 @@
         }
     });
 </script>
+{% endlocalize %}
 {% endblock %}

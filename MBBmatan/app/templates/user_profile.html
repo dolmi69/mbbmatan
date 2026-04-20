@@ -40,6 +40,19 @@
         display: flex;
         gap: 15px;
         justify-content: center;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 700px) {
+        .profile-container { padding: 20px; margin: 15px; border-radius: 14px; }
+        .profile-header { flex-direction: column; text-align: center; gap: 15px; }
+        .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        .action-buttons .btn, .action-buttons form { flex: 1 1 100%; }
+        .action-buttons form button { width: 100%; }
+    }
+    @media (max-width: 420px) {
+        .stat-grid { grid-template-columns: 1fr; }
+        .avatar-large { font-size: 60px; }
+        .profile-container h1 { font-size: 22px; }
     }
 </style>
 

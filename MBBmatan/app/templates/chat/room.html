@@ -80,6 +80,28 @@
         border-radius: 30px;
         font-weight: bold;
         cursor: pointer;
+        white-space: nowrap;
+    }
+    @media (max-width: 768px) {
+        .chat-room {
+            height: calc(100vh - 130px);
+            min-height: 0;
+            border-radius: 14px;
+        }
+        .chat-header { padding: 14px 16px; }
+        .chat-header h2 { font-size: 18px; }
+        .messages-container { padding: 14px; gap: 10px; }
+        .message { max-width: 85%; padding: 10px 13px; font-size: 15px; }
+        .message-input-area { padding: 12px; }
+        .btn-send { padding: 10px 16px; font-size: 14px; }
+        .btn-send span, .btn-send .label { display: none; }
+        #messageInput { padding: 10px 14px !important; font-size: 15px; }
+    }
+    @media (max-width: 480px) {
+        .chat-room { height: calc(100vh - 120px); border-radius: 10px; }
+        .message { max-width: 92%; font-size: 14px; }
+        .chat-header h2 { font-size: 16px; }
+        .chat-header p { font-size: 13px; }
     }
 </style>
 {% endblock %}
@@ -94,7 +116,10 @@
 
     <div class="messages-container" id="messagesContainer">
         {% for msg in messages %}
-        <div class="message {% if msg.sender == user %}own-message{% endif %}" id="msg-{{ msg.id }}">
+        <div class="message {% if msg.sender == user %}own-message{% endif %}"
+             id="msg-{{ msg.id }}"
+             data-sender-id="{{ msg.sender.id }}"
+             data-sender="{{ msg.sender.username }}">
             {% if msg.reply_to %}
             <div class="reply-preview">
                 <i class="fas fa-reply"></i> {{ msg.reply_to.sender.username }}: {{ msg.reply_to.message|truncatechars:50 }}
@@ -105,7 +130,7 @@
             <div class="message-time">{{ msg.timestamp|date:"H:i" }}</div>
         </div>
         {% empty %}
-        <p style="text-align:center; color:#aaa;">Пока нет сообщений. Начните общение!</p>
+        <p id="emptyPlaceholder" style="text-align:center; color:#aaa;">Пока нет сообщений. Начните общение!</p>
         {% endfor %}
     </div>
 
@@ -125,77 +150,126 @@
 {% block extra_js %}
 <script>
     const roomId = {{ room.id }};
-    const currentUser = "{{ user.username }}";
+    const currentUser = "{{ user.username|escapejs }}";
+    const currentUserId = {{ user.id }};
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsScheme}://${window.location.host}/ws/chat/${roomId}/`;
+
     let replyToId = null;
+    let socket = null;
+    let reconnectDelay = 1000;
 
-    const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomId}/`);
+    const container = document.getElementById('messagesContainer');
+    const input = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const replyIndicator = document.getElementById('replyIndicator');
+    const replyUsername = document.getElementById('replyUsername');
 
-    socket.onopen = () => console.log('WebSocket connected');
-    socket.onclose = () => console.log('WebSocket closed');
+    function connect() {
+        socket = new WebSocket(wsUrl);
 
-    socket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        addMessageElement(data, data.sender === currentUser);
-    };
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+            reconnectDelay = 1000;
+            sendButton.disabled = false;
+        };
+        socket.onclose = (e) => {
+            console.log('WebSocket closed', e.code);
+            sendButton.disabled = true;
+            if (e.code !== 4001 && e.code !== 4003) {
+                setTimeout(connect, reconnectDelay);
+                reconnectDelay = Math.min(reconnectDelay * 2, 15000);
+            }
+        };
+        socket.onerror = () => socket.close();
+        socket.onmessage = (e) => {
+            let data;
+            try { data = JSON.parse(e.data); } catch (_) { return; }
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            if (document.getElementById(`msg-${data.id}`)) return;
+            addMessageElement(data, data.sender_id === currentUserId);
+        };
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+    }
+
+    function truncate(text, n) {
+        text = text == null ? '' : String(text);
+        return text.length > n ? text.slice(0, n) + '…' : text;
+    }
 
     function addMessageElement(data, own) {
-        const container = document.getElementById('messagesContainer');
-        const emptyMsg = container.querySelector('p');
-        if (emptyMsg) emptyMsg.remove();
+        const placeholder = document.getElementById('emptyPlaceholder');
+        if (placeholder) placeholder.remove();
 
         const div = document.createElement('div');
         div.className = `message ${own ? 'own-message' : ''}`;
         div.id = `msg-${data.id}`;
+        div.dataset.senderId = data.sender_id;
+        div.dataset.sender = data.sender;
 
         let replyHtml = '';
         if (data.reply_to) {
-            replyHtml = `<div class="reply-preview"><i class="fas fa-reply"></i> ${data.reply_to.sender}: ${data.reply_to.message}</div>`;
+            replyHtml = `<div class="reply-preview"><i class="fas fa-reply"></i> ${escapeHtml(data.reply_to.sender)}: ${escapeHtml(truncate(data.reply_to.message, 50))}</div>`;
         }
 
+        const senderUrl = `/profile/${encodeURIComponent(data.sender_id)}/`;
         div.innerHTML = `
             ${replyHtml}
-            <a href="/profile/${data.sender}/" class="message-sender">${data.sender}</a>
+            <a href="${senderUrl}" class="message-sender">${escapeHtml(data.sender)}</a>
             <div>${escapeHtml(data.message).replace(/\n/g, '<br>')}</div>
-            <div class="message-time">${data.timestamp}</div>
+            <div class="message-time">${escapeHtml(data.timestamp)}</div>
         `;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
     }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    document.getElementById('sendButton').addEventListener('click', () => {
-        const input = document.getElementById('messageInput');
+    function sendMessage() {
         const message = input.value.trim();
         if (!message) return;
-        socket.send(JSON.stringify({
-            message: message,
-            reply_to: replyToId
-        }));
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            alert('Соединение с сервером потеряно. Подождите...');
+            return;
+        }
+        socket.send(JSON.stringify({ message, reply_to: replyToId }));
         input.value = '';
         replyToId = null;
-        document.getElementById('replyIndicator').style.display = 'none';
+        replyIndicator.style.display = 'none';
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
     });
 
-    document.querySelectorAll('.message').forEach(msg => {
-        msg.addEventListener('click', function(e) {
-            if (e.target.closest('a')) return;
-            const sender = this.querySelector('.message-sender').textContent;
-            const msgId = this.id.replace('msg-', '');
-            replyToId = parseInt(msgId);
-            document.getElementById('replyUsername').textContent = sender;
-            document.getElementById('replyIndicator').style.display = 'flex';
-            document.getElementById('messageInput').focus();
-        });
+    container.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return;
+        const msgEl = e.target.closest('.message');
+        if (!msgEl) return;
+        const msgId = parseInt(msgEl.id.replace('msg-', ''), 10);
+        if (Number.isNaN(msgId)) return;
+        replyToId = msgId;
+        replyUsername.textContent = msgEl.dataset.sender || '';
+        replyIndicator.style.display = 'flex';
+        input.focus();
     });
 
     document.getElementById('cancelReply').addEventListener('click', () => {
         replyToId = null;
-        document.getElementById('replyIndicator').style.display = 'none';
+        replyIndicator.style.display = 'none';
     });
+
+    container.scrollTop = container.scrollHeight;
+    connect();
 </script>
 {% endblock %}
