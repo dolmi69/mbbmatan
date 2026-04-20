@@ -45,6 +45,15 @@
         gap: 20px;
         justify-content: center;
         margin-top: 30px;
+        flex-wrap: wrap;
+    }
+    @media (max-width: 600px) {
+        .result-container { padding: 20px; margin: 15px; border-radius: 14px; }
+        .result-container h1 { font-size: 22px; }
+        .score-circle { width: 140px; height: 140px; font-size: 36px; }
+        .result-message { font-size: 18px; }
+        .action-buttons { flex-direction: column; gap: 10px; }
+        .action-buttons .btn { width: 100%; }
     }
 </style>
 

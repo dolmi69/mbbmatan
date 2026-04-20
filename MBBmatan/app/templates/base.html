@@ -26,6 +26,17 @@
             min-height: 100vh;
         }
 
+        img, svg, canvas, video { max-width: 100%; height: auto; }
+        table { max-width: 100%; }
+
+        .mascot-svg {
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto;
+            display: block;
+        }
+        .mascot-svg svg { width: 100%; height: auto; display: block; }
+
         /* ----- ШАПКА ----- */
         .navbar {
             background: #5a6e7c;
@@ -45,6 +56,7 @@
             max-width: 1400px;
             margin: 0 auto;
             height: 75px;
+            gap: 15px;
         }
 
         .logo {
@@ -55,11 +67,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .logo i { color: #f1c40f; }
 
-        .nav-menu { display: flex; gap: 5px; }
+        .nav-menu { display: flex; gap: 5px; align-items: center; }
 
         .nav-link {
             color: white;
@@ -71,6 +84,7 @@
             align-items: center;
             gap: 6px;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .nav-link:hover { background: rgba(255,255,255,0.15); }
@@ -84,12 +98,13 @@
             left: 0;
             background: #4a5c6a;
             border-radius: 8px;
-            min-width: 160px;
+            min-width: 180px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
             z-index: 1001;
         }
 
-        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown:hover .dropdown-content,
+        .dropdown.open .dropdown-content { display: block; }
 
         .dropdown-content a {
             color: white;
@@ -130,6 +145,9 @@
             text-decoration: none;
             transition: all 0.2s;
             font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-profile:hover, .btn-logout:hover {
@@ -137,13 +155,14 @@
             border-color: rgba(255,255,255,0.6);
         }
 
-        .auth-buttons { display: flex; gap: 10px; }
+        .auth-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
 
         .btn-login, .btn-signup {
             padding: 8px 18px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .btn-login {
@@ -160,6 +179,31 @@
 
         .btn-login:hover { background: rgba(255,255,255,0.2); }
         .btn-signup:hover { background: #27ae60; }
+
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 998;
+        }
+        .nav-backdrop.open { display: block; }
+
+        .nav-mobile-user { display: none; }
 
         /* ----- ОСНОВНОЙ КОНТЕНТ ----- */
         .main-content {
@@ -232,36 +276,123 @@
         .footer-section a:hover { text-decoration: underline; }
 
         /* ----- АДАПТИВНОСТЬ ----- */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
+            .user-info { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .nav-toggle { display: inline-flex; }
+
             .nav-container {
-                flex-wrap: wrap;
-                height: auto;
-                padding: 10px 0;
+                height: 64px;
+                gap: 10px;
             }
+
             .nav-menu {
-                order: 3;
-                width: 100%;
-                justify-content: center;
-                margin-top: 10px;
-                flex-wrap: wrap;
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: min(82vw, 320px);
+                height: 100vh;
+                background: #4a5c6a;
+                flex-direction: column;
+                align-items: stretch;
                 gap: 2px;
+                padding: 70px 18px 24px;
+                transform: translateX(105%);
+                transition: transform 0.28s ease;
+                overflow-y: auto;
+                box-shadow: -6px 0 18px rgba(0,0,0,0.25);
+                z-index: 1002;
             }
-            .nav-link {
-                padding: 8px 10px;
-                font-size: 14px;
+            .nav-menu.open { transform: translateX(0); }
+
+            .nav-menu .nav-link {
+                width: 100%;
+                padding: 14px 16px;
+                font-size: 16px;
+                border-radius: 10px;
             }
-            .logo {
-                font-size: 22px;
+
+            .dropdown { width: 100%; }
+            .dropdown > .nav-link::after {
+                content: "\f107";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                margin-left: auto;
+                transition: transform 0.2s;
             }
-            .user-section {
-                gap: 8px;
+            .dropdown.open > .nav-link::after { transform: rotate(180deg); }
+            .dropdown-content {
+                position: static;
+                box-shadow: none;
+                background: rgba(0,0,0,0.2);
+                width: 100%;
+                min-width: 0;
+                margin-top: 4px;
             }
-            .btn-profile, .btn-logout {
-                padding: 6px 10px;
+            .dropdown:hover .dropdown-content { display: none; }
+            .dropdown.open .dropdown-content { display: block; }
+
+            .logo { font-size: 22px; }
+            .user-section { display: none; }
+
+            .nav-mobile-user {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                margin-top: 18px;
+                padding-top: 14px;
+                border-top: 1px solid rgba(255,255,255,0.15);
             }
-            .main-content {
-                padding: 0 15px;
+            .nav-user-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 6px 10px 14px;
+                color: white;
             }
+            .nav-user-header > i {
+                font-size: 36px;
+                color: #f1c40f;
+            }
+            .nav-user-name {
+                font-weight: bold;
+                font-size: 16px;
+                margin-bottom: 4px;
+                word-break: break-word;
+            }
+            .nav-logout-form { width: 100%; margin: 0; }
+            .nav-logout-btn {
+                width: 100%;
+                background: transparent;
+                border: none;
+                text-align: left;
+                color: #ffb3a7;
+                cursor: pointer;
+                font: inherit;
+            }
+            .nav-badge {
+                margin-left: auto;
+                background: #e74c3c;
+                color: white;
+                border-radius: 20px;
+                padding: 2px 8px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .navbar { padding: 5px 12px; }
+            .main-content { padding: 0 12px; margin: 15px auto; }
+            .logo { font-size: 20px; }
+            .logo-text { display: none; }
+            .btn-profile, .btn-logout { padding: 6px 10px; font-size: 14px; }
+            .btn-login span, .btn-signup span { display: none; }
+            .auth-buttons .btn-login,
+            .auth-buttons .btn-signup { padding: 8px 12px; }
+            .alert { padding: 12px 15px; font-size: 14px; }
             .footer-container {
                 flex-direction: column;
                 text-align: center;
@@ -269,22 +400,9 @@
             }
         }
 
-        @media (max-width: 480px) {
-            .nav-menu {
-                flex-direction: column;
-                align-items: center;
-            }
-            .dropdown-content {
-                position: static;
-                box-shadow: none;
-                background: #3a4c5a;
-                width: 100%;
-                text-align: center;
-            }
-            .level-badge {
-                font-size: 10px;
-            }
-        }
+        @media (max-width: 400px) {
+            .user-actions { gap: 4px; }
+            .btn-profile, .btn-logout { width: 36px; height: 36px; padding: 0; }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -293,14 +411,18 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="{% url 'app:home' %}" class="logo">
-                <i class="fas fa-calculator"></i> MATAN
+                <i class="fas fa-calculator"></i> <span class="logo-text">MATAN</span>
             </a>
 
-            <div class="nav-menu">
+            <button type="button" class="nav-toggle" id="navToggle" aria-label="Меню" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="nav-menu" id="navMenu">
                 <a href="{% url 'app:home' %}" class="nav-link"><i class="fas fa-home"></i> Главная</a>
 
                 <div class="dropdown">
-                    <a href="#" class="nav-link"><i class="fas fa-book"></i> Предметы</a>
+                    <a href="#" class="nav-link nav-dropdown-toggle"><i class="fas fa-book"></i> Предметы</a>
                     <div class="dropdown-content">
                         <a href="{% url 'app:f_f' %}"><i class="fas fa-flask"></i> Физика</a>
                         <a href="{% url 'app:t_a' %}"><i class="fas fa-square-root-alt"></i> Алгебра</a>
@@ -315,6 +437,34 @@
                     <a href="{% url 'app:chat_home' %}" class="nav-link"><i class="fas fa-comments"></i> Чат</a>
                     <a href="{% url 'app:manage_friends' %}" class="nav-link"><i class="fas fa-users"></i> Друзья</a>
                     <a href="{% url 'app:ai_chat_fullscreen' %}" class="nav-link"><i class="fas fa-robot"></i> AI-чат</a>
+
+                    <div class="nav-mobile-user">
+                        <div class="nav-user-header">
+                            <i class="fas fa-user-circle"></i>
+                            <div>
+                                <div class="nav-user-name">{{ user.username }}</div>
+                                {% if user.profile %}
+                                    <span class="level-badge">Ур. {{ user.profile.level }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="{% url 'app:profile' %}" class="nav-link"><i class="fas fa-user"></i> Профиль</a>
+                        <a href="{% url 'app:notifications' %}" class="nav-link">
+                            <i class="fas fa-bell"></i> Уведомления
+                            {% if unread_notifications %}
+                                <span class="nav-badge">{{ unread_notifications }}</span>
+                            {% endif %}
+                        </a>
+                        <form action="{% url 'app:logout' %}" method="post" class="nav-logout-form">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link nav-logout-btn"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="nav-mobile-user">
+                        <a href="{% url 'app:login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Войти</a>
+                        <a href="{% url 'app:signup' %}" class="nav-link"><i class="fas fa-user-plus"></i> Регистрация</a>
+                    </div>
                 {% endif %}
             </div>
 
@@ -345,23 +495,80 @@
                     </div>
                 {% else %}
                     <div class="auth-buttons">
-                        <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Войти</a>
-                        <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> Регистрация</a>
+                        <a href="{% url 'app:login' %}" class="btn-login"><i class="fas fa-sign-in-alt"></i> <span>Войти</span></a>
+                        <a href="{% url 'app:signup' %}" class="btn-signup"><i class="fas fa-user-plus"></i> <span>Регистрация</span></a>
                     </div>
                 {% endif %}
             </div>
         </div>
     </nav>
+    <div class="nav-backdrop" id="navBackdrop"></div>
+
+    <script>
+        (function () {
+            const toggle = document.getElementById('navToggle');
+            const menu = document.getElementById('navMenu');
+            const backdrop = document.getElementById('navBackdrop');
+            if (!toggle || !menu || !backdrop) return;
+
+            function setOpen(open) {
+                menu.classList.toggle('open', open);
+                backdrop.classList.toggle('open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.querySelector('i').className = open ? 'fas fa-times' : 'fas fa-bars';
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+
+            toggle.addEventListener('click', function () {
+                setOpen(!menu.classList.contains('open'));
+            });
+            backdrop.addEventListener('click', function () { setOpen(false); });
+
+            menu.querySelectorAll('.nav-dropdown-toggle').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    if (window.matchMedia('(max-width: 900px)').matches) {
+                        e.preventDefault();
+                        el.parentElement.classList.toggle('open');
+                    }
+                });
+            });
+
+            menu.querySelectorAll('.nav-link').forEach(function (el) {
+                if (el.classList.contains('nav-dropdown-toggle')) return;
+                el.addEventListener('click', function () { setOpen(false); });
+            });
+            menu.querySelectorAll('.dropdown-content a').forEach(function (el) {
+                el.addEventListener('click', function () { setOpen(false); });
+            });
+
+            window.addEventListener('resize', function () {
+                if (!window.matchMedia('(max-width: 900px)').matches) setOpen(false);
+            });
+        })();
+    </script>
 
     <main class="main-content">
         {% if messages %}
-            <div class="messages-container">
+            <div class="messages-container" id="flashMessages">
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags|default:'info' }}">
                         {{ message }}
                     </div>
                 {% endfor %}
             </div>
+            <script>
+                (function () {
+                    const container = document.getElementById('flashMessages');
+                    if (!container) return;
+                    setTimeout(function () {
+                        container.querySelectorAll('.alert').forEach(function (el) {
+                            el.style.transition = 'opacity 0.4s ease';
+                            el.style.opacity = '0';
+                            setTimeout(function () { el.remove(); }, 400);
+                        });
+                    }, 5000);
+                })();
+            </script>
         {% endif %}
 
         {% block content %}{% endblock %}

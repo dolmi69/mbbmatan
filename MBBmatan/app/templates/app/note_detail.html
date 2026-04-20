@@ -8,9 +8,20 @@
 {% endblock %}
 
 {% block content %}
-<div style="max-width:1000px; margin:30px auto; background:white; padding:30px; border-radius:20px;">
+<style>
+    .note-view { max-width:1000px; margin:30px auto; background:white; padding:30px; border-radius:20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+    .note-view-actions { display:flex; gap:10px; margin-bottom:20px; flex-wrap: wrap; }
+    #canvas-view { overflow-x: auto; max-width: 100%; }
+    .note-text { overflow-x: auto; word-wrap: break-word; }
+    @media (max-width: 600px) {
+        .note-view { padding: 18px; margin: 15px; border-radius: 14px; }
+        .note-view h1 { font-size: 22px; word-break: break-word; }
+        .note-view-actions .btn { flex: 1; text-align: center; }
+    }
+</style>
+<div class="note-view">
     <h1>{{ note.title|default:"Без названия" }}</h1>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
+    <div class="note-view-actions">
         <a href="{% url 'app:note_update' note.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-edit"></i> Редактировать</a>
         <a href="{% url 'app:note_delete' note.pk %}" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Удалить</a>
     </div>

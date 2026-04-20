@@ -1,5 +1,39 @@
 from django.utils.deprecation import MiddlewareMixin
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render
 import random
+
+
+ERROR_MESSAGES = {
+    400: 'Некорректный запрос.',
+    403: 'Доступ запрещён. У вас нет прав для просмотра этой страницы.',
+    404: 'Страница не найдена. Возможно, её удалили или вы ошиблись в адресе.',
+    500: 'Внутренняя ошибка сервера. Мы уже работаем над исправлением.',
+}
+
+
+def render_error(request, code, message=None):
+    context = {
+        'error_code': code,
+        'message': message or ERROR_MESSAGES.get(code, 'Произошла ошибка.'),
+    }
+    return render(request, 'error.html', context, status=code)
+
+
+class ErrorPageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_exception(self, request, exception):
+        if isinstance(exception, Http404):
+            return render_error(request, 404, str(exception) or None)
+        if isinstance(exception, PermissionDenied):
+            return render_error(request, 403, str(exception) or None)
+        return None
 
 
 class MascotMiddleware(MiddlewareMixin):

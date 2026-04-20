@@ -16,6 +16,7 @@ from django.contrib import messages
 from django.db.models import Q
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
 from .gigachat_service import GigaChatService
 
 class RegisterView(CreateView):
@@ -63,10 +64,14 @@ class NoteUpdateView(LoginRequiredMixin, UpdateView):
     fields = ['title', 'content', 'canvas_data']
     template_name = "app/note_form.html"
     success_url = reverse_lazy("app:note_list")
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)
 
 class NoteDeleteView(LoginRequiredMixin, DeleteView):
     model = Note
     success_url = reverse_lazy("app:note_list")
+    def get_queryset(self):
+        return Note.objects.filter(user=self.request.user)
 
 @login_required
 @require_POST
@@ -198,8 +203,7 @@ def subject_chat(request, subject):
 def chat_room(request, room_id):
     room = get_object_or_404(ChatRoom, id=room_id, is_active=True)
     if room.room_type == 'private' and request.user not in room.participants.all():
-        messages.error(request, 'Нет доступа')
-        return redirect('app:chat_home')
+        raise PermissionDenied('Это приватный чат, вы не являетесь его участником.')
     if room.room_type in ['physics', 'algebra', 'geometry', 'group']:
         if request.user not in room.participants.all():
             room.participants.add(request.user)
@@ -436,14 +440,8 @@ def ai_chat_clear(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 def custom_error_view(request, code, exception=None):
-    messages_map = {
-        400: 'Некорректный запрос.',
-        403: 'Доступ запрещён.',
-        404: 'Страница не найдена.',
-        500: 'Внутренняя ошибка сервера. Мы уже работаем над исправлением.',
-    }
-    context = {'message': messages_map.get(code, 'Произошла ошибка.'), 'error_code': code}
-    return render(request, 'error.html', context, status=code)
+    from .middleware import render_error
+    return render_error(request, code)
 
 def test_choice(request):
     return render(request, 'test_choice.html')
