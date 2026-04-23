@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from .models import (
     Note, ChatMessage, ChatRoom, FavoriteFormula, FormulaQuestion,
-    TestAttempt, UserProfile, FriendRequest, User, Notification
+    TestAttempt, UserProfile, FriendRequest, User, Notification, Formula
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -383,11 +383,6 @@ def get_hint(request):
         return JsonResponse({'hint': hint})
     return JsonResponse({'hint': 'Нет активного вопроса'})
 
-def f_f(request):
-    favorites = []
-    if request.user.is_authenticated:
-        favorites = list(FavoriteFormula.objects.filter(user=request.user).values_list('formula_text', flat=True))
-    return render(request, 'formuls/f-f.html', {'favorites_json': json.dumps(favorites)})
 
 def t_f(request):
     return render(request, 'formuls/physics.html')
@@ -446,15 +441,22 @@ def custom_error_view(request, code, exception=None):
 def test_choice(request):
     return render(request, 'test_choice.html')
 
+def f_f(request):
+    formulas = Formula.objects.filter(subject='physics')
+    favorites = []
+    if request.user.is_authenticated:
+        favorites = list(FavoriteFormula.objects.filter(user=request.user).values_list('formula_text', flat=True))
+    return render(request, 'formuls/f-f.html', {'formulas': formulas, 'favorites_json': json.dumps(favorites)})
+
 def f_a(request):
-    formulas = FormulaQuestion.objects.filter(subject='algebra')
+    formulas = Formula.objects.filter(subject='algebra')
     favorites = []
     if request.user.is_authenticated:
         favorites = list(FavoriteFormula.objects.filter(user=request.user).values_list('formula_text', flat=True))
     return render(request, 'formuls/f_a.html', {'formulas': formulas, 'favorites_json': json.dumps(favorites)})
 
 def f_g(request):
-    formulas = FormulaQuestion.objects.filter(subject='geometry')
+    formulas = Formula.objects.filter(subject='geometry')
     favorites = []
     if request.user.is_authenticated:
         favorites = list(FavoriteFormula.objects.filter(user=request.user).values_list('formula_text', flat=True))

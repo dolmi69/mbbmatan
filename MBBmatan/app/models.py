@@ -244,7 +244,20 @@ class AIChatHistory(models.Model):
         verbose_name_plural = 'Истории диалогов с AI'
 
 
-# Сигнал для добавления 5 вопросов по каждому предмету при миграциях
+class Formula(models.Model):
+    SUBJECTS = [
+        ('physics', 'Физика'),
+        ('algebra', 'Алгебра'),
+        ('geometry', 'Геометрия'),
+    ]
+    subject = models.CharField(max_length=20, choices=SUBJECTS)
+    text = models.CharField("Формула", max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.text
+
+
 @receiver(post_migrate)
 def create_default_questions(sender, **kwargs):
     if sender.name == 'app':
@@ -276,3 +289,22 @@ def create_default_questions(sender, **kwargs):
                     correct_answer=correct,
                     options=options
                 )
+
+        if not Formula.objects.exists():
+            formulas_data = [
+                ('physics', 'E = mc²'),
+                ('physics', 'F = ma'),
+                ('physics', 'V = IR'),
+                ('physics', 'F = G·m₁·m₂/r²'),
+                ('algebra', '(a+b)² = a² + 2ab + b²'),
+                ('algebra', 'a² - b² = (a-b)(a+b)'),
+                ('algebra', 'x₁+x₂ = -b/a'),
+                ('algebra', 'D = b² - 4ac'),
+                ('geometry', 'S = πr²'),
+                ('geometry', 'c² = a² + b²'),
+                ('geometry', 'S = ½·a·h'),
+                ('geometry', 'P = 2(a+b)'),
+                ('geometry', 'Сумма углов треугольника = 180°'),
+            ]
+            for subject, text in formulas_data:
+                Formula.objects.create(subject=subject, text=text)
