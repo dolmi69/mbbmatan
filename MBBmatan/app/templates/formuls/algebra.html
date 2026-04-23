@@ -18,6 +18,17 @@
         margin-top: 0;
         text-align: center;
     }
+    .search-box {
+        margin-bottom: 30px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 1px solid #ddd;
+        border-radius: 40px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
     .term-item {
         margin-bottom: 25px;
         padding: 20px;
@@ -40,6 +51,12 @@
         color: #34495e;
         padding-left: 19px;
     }
+    .no-results {
+        text-align: center;
+        padding: 30px;
+        color: #7f8c8d;
+        display: none;
+    }
     @media (max-width: 600px) {
         .theory-container { padding: 18px; margin: 15px; border-radius: 14px; }
         .theory-container h1 { font-size: 22px; }
@@ -51,29 +68,58 @@
 
 <div class="theory-container">
     <h1><i class="fas fa-square-root-alt"></i> Алгебраические правила и формулы</h1>
-    <div class="term-item">
-        <h3>Порядок действий</h3>
-        <p>Сначала скобки, затем умножение и деление, потом сложение и вычитание.</p>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Поиск по терминам...">
     </div>
-    <div class="term-item">
-        <h3>Квадрат суммы</h3>
-        <p>(a + b)² = a² + 2ab + b²</p>
+    <div id="termsContainer">
+        <div class="term-item">
+            <h3>Порядок действий</h3>
+            <p>Сначала скобки, затем умножение и деление, потом сложение и вычитание.</p>
+        </div>
+        <div class="term-item">
+            <h3>Квадрат суммы</h3>
+            <p>(a + b)² = a² + 2ab + b²</p>
+        </div>
+        <div class="term-item">
+            <h3>Квадрат разности</h3>
+            <p>(a - b)² = a² - 2ab + b²</p>
+        </div>
+        <div class="term-item">
+            <h3>Разность квадратов</h3>
+            <p>a² - b² = (a - b)(a + b)</p>
+        </div>
+        <div class="term-item">
+            <h3>Теорема Виета</h3>
+            <p>Для квадратного уравнения ax² + bx + c = 0 сумма корней x₁ + x₂ = -b/a, произведение x₁·x₂ = c/a.</p>
+        </div>
+        <div class="term-item">
+            <h3>Дискриминант</h3>
+            <p>D = b² - 4ac. Если D > 0 — два корня, D = 0 — один корень, D < 0 — корней нет.</p>
+        </div>
     </div>
-    <div class="term-item">
-        <h3>Квадрат разности</h3>
-        <p>(a - b)² = a² - 2ab + b²</p>
-    </div>
-    <div class="term-item">
-        <h3>Разность квадратов</h3>
-        <p>a² - b² = (a - b)(a + b)</p>
-    </div>
-    <div class="term-item">
-        <h3>Теорема Виета</h3>
-        <p>Для квадратного уравнения ax² + bx + c = 0 сумма корней x₁ + x₂ = -b/a, произведение x₁·x₂ = c/a.</p>
-    </div>
-    <div class="term-item">
-        <h3>Дискриминант</h3>
-        <p>D = b² - 4ac. Если D > 0 — два корня, D = 0 — один корень, D < 0 — корней нет.</p>
-    </div>
+    <div class="no-results" id="noResults">Ничего не найдено</div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const items = document.querySelectorAll('.term-item');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', function() {
+        const term = this.value.toLowerCase().trim();
+        let visible = 0;
+        items.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            if (text.includes(term)) {
+                item.style.display = 'block';
+                visible++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        noResults.style.display = visible === 0 ? 'block' : 'none';
+    });
+</script>
 {% endblock %}
